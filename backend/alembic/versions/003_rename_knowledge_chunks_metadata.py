@@ -1,7 +1,7 @@
 """Rename metadata to extra_data in knowledge_chunks
 
-Revision ID: 003_rename_knowledge_chunks_metadata
-Revises: 002_knowledge_chunks
+Revision ID: 004_rename_knowledge_chunks_metadata
+Revises: 003_knowledge_chunks
 Create Date: 2026-01-13
 
 """
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '003_rename_knowledge_chunks_metadata'
-down_revision: Union[str, None] = '002_knowledge_chunks'
+revision: str = '004_rename_knowledge_chunks_metadata'
+down_revision: Union[str, None] = '003_knowledge_chunks'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

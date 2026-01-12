@@ -184,7 +184,7 @@ class KnowledgeChunkService:
                     event_id=event.id,
                     chunk_type="speaker",
                     content=text,
-                    metadata={"speaker_id": str(speaker.id)},
+                    extra_data={"speaker_id": str(speaker.id)},
                 )
             )
 
