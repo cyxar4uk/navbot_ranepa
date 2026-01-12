@@ -14,7 +14,7 @@ class EventItemBase(BaseModel):
     capacity: Optional[int] = Field(None, ge=0)
     type: Optional[str] = Field(None, max_length=50)
     status: str = Field(default="active", pattern="^(active|cancelled|finished)$")
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    extra_data: dict[str, Any] = Field(default_factory=dict)
 
 
 class EventItemCreate(EventItemBase):

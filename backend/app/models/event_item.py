@@ -26,7 +26,7 @@ class EventItem(Base):
     type = Column(String(50), nullable=True)  # lecture, workshop, networking, etc.
     status = Column(String(20), default="active")  # active, cancelled, finished
     
-    metadata = Column(JSONB, default={})  # Additional data
+    extra_data = Column(JSONB, default={})  # Additional data (renamed from metadata to avoid SQLAlchemy conflict)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
