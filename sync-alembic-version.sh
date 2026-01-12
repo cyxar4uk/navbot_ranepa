@@ -126,8 +126,11 @@ else
 fi
 
 # Вставляем новую версию
+info "Выполняем INSERT: INSERT INTO alembic_version (version_num) VALUES ('$TARGET_VERSION');"
 INSERT_RESULT=$(docker-compose exec -T db psql -U postgres -d navbot -c "INSERT INTO alembic_version (version_num) VALUES ('$TARGET_VERSION');" 2>&1)
 INSERT_EXIT_CODE=$?
+
+info "Результат INSERT: exit_code=$INSERT_EXIT_CODE, output=$INSERT_RESULT"
 
 # Проверяем результат более тщательно
 if [ $INSERT_EXIT_CODE -eq 0 ]; then
