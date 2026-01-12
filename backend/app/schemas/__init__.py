@@ -6,6 +6,7 @@ from app.schemas.speaker import SpeakerCreate, SpeakerUpdate, SpeakerResponse
 from app.schemas.registration import RegistrationCreate, RegistrationResponse
 from app.schemas.location import LocationCreate, LocationUpdate, LocationResponse, ZoneCreate, ZoneResponse
 from app.schemas.assistant import AssistantChatRequest, AssistantChatResponse, AssistantKnowledgeCreate
+from app.schemas.knowledge_chunk import KnowledgeChunkResponse, KnowledgeChunkRefreshRequest
 from app.schemas.news import NewsCreate, NewsUpdate, NewsResponse
 from app.schemas.message import MessageCreate, MessageResponse
 
