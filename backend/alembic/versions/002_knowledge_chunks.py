@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column("event_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("chunk_type", sa.String(length=50), nullable=True),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("metadata", postgresql.JSONB(astext_type=sa.Text()), nullable=True, default={}),
+        sa.Column("extra_data", postgresql.JSONB(astext_type=sa.Text()), nullable=True, default={}),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
         sa.ForeignKeyConstraint(["event_id"], ["events.id"], ondelete="CASCADE"),
