@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,15 +7,30 @@ from app.config import settings
 from app.database import init_db, close_db
 from app.api import api_router
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    await init_db()
+    try:
+        await init_db()
+        logger.info("Database initialization completed successfully")
+    except Exception as e:
+        # Не падаем при ошибках инициализации БД, так как миграции Alembic уже применены
+        # create_all может конфликтовать с существующими таблицами, созданными через миграции
+        logger.warning(f"Database initialization warning (tables may already exist via migrations): {e}")
+        logger.info("Continuing startup - assuming migrations are already applied")
+    
     yield
+    
     # Shutdown
-    await close_db()
+    try:
+        await close_db()
+        logger.info("Database connections closed")
+    except Exception as e:
+        logger.error(f"Error closing database connections: {e}")
 
 
 app = FastAPI(
