@@ -5,7 +5,7 @@ import Loading from '../common/Loading'
 import ErrorMessage from '../common/ErrorMessage'
 import EmptyState from '../common/EmptyState'
 import type { Event } from '../../types'
-import { Plus, Calendar, Settings, ChevronRight, Shield } from 'lucide-react'
+import { Plus, Calendar, Settings, ChevronRight } from 'lucide-react'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()

@@ -135,10 +135,6 @@ export default function EventBuilder() {
     }
   }
 
-  if (!isAdmin) {
-    return <ErrorMessage message="Доступ запрещён" />
-  }
-
   if (loading) {
     return <Loading text="Загрузка..." fullScreen />
   }
