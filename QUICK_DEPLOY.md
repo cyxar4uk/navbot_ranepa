@@ -47,6 +47,25 @@ git clean -fd
 
 Теперь при каждом `git push` изменения автоматически деплоятся на сервер.
 
+### 5. Проверка работоспособности
+
+После деплоя проверьте:
+
+```bash
+# На сервере проверьте статус контейнеров
+cd /www/wwwroot/testingsmth.anyway-community.ru/navbot_ranepa
+docker-compose ps
+
+# Проверьте логи если что-то не работает
+docker-compose logs backend
+docker-compose logs frontend
+
+# Проверьте доступность API
+curl http://localhost:8000/health
+```
+
+Подробнее см. `HEALTHCHECK.md`
+
 ---
 
 ## Альтернатива: Ручной деплой скрипт

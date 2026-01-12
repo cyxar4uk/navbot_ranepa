@@ -1,0 +1,16 @@
+# Пример файла для переопределения настроек в production
+# Скопируйте в docker-compose.override.yml и настройте под себя
+
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      # Переопределите переменные окружения для production
+      DEBUG: "false"
+      # DATABASE_URL: "postgresql+asyncpg://user:pass@host:5432/db"
+    
+  frontend:
+    # Можно изменить порт для frontend
+    # ports:
+    #   - "80:80"

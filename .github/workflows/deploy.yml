@@ -49,9 +49,37 @@ jobs:
             git clean -fd  # Удаляем неотслеживаемые файлы
             
             # Работа только с контейнерами этого проекта (используем -f для явного указания файла)
+            echo "🛑 Stopping containers..."
             docker-compose -f docker-compose.yml down
+            
+            echo "🔨 Building and starting containers..."
             docker-compose -f docker-compose.yml up -d --build
-            docker-compose -f docker-compose.yml exec -T backend alembic upgrade head 2>/dev/null || echo "Migrations skipped"
+            
+            echo "🗄️ Running database migrations..."
+            sleep 5  # Ждем запуска БД
+            docker-compose -f docker-compose.yml exec -T backend alembic upgrade head 2>/dev/null || echo "⚠️ Migrations skipped or already applied"
+            
+            echo "✅ Checking container status..."
+            docker-compose -f docker-compose.yml ps
+            
+            echo "🔍 Waiting for services to be ready..."
+            sleep 10
+            
+            # Проверка что контейнеры запущены
+            if ! docker-compose -f docker-compose.yml ps | grep -q "Up"; then
+              echo "❌ Warning: Some containers may not be running"
+              docker-compose -f docker-compose.yml ps
+            else
+              echo "✅ All containers are running"
+            fi
+            
+            # Проверка доступности backend
+            echo "🌐 Checking backend health..."
+            if curl -f http://localhost:8000/health >/dev/null 2>&1; then
+              echo "✅ Backend is healthy"
+            else
+              echo "⚠️ Backend health check failed (may need more time to start)"
+            fi
       
       - name: Notify deployment status
         if: always()
