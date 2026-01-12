@@ -3,13 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models import User
 from app.schemas import (
     EventCreate, EventUpdate, EventResponse, EventListResponse,
     ModuleResponse, AssistantKnowledgeCreate, AssistantKnowledgeResponse
 )
 from app.services import EventService, ModuleService, AssistantService
-from app.api.deps import get_current_admin
 from app.api.admin_auth import get_current_admin_token
 
 router = APIRouter(dependencies=[Depends(get_current_admin_token)])
@@ -21,8 +19,7 @@ router = APIRouter(dependencies=[Depends(get_current_admin_token)])
 async def admin_get_events(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
+    db: AsyncSession = Depends(get_db)
 ):
     """Get all events (admin)"""
     service = EventService(db)
@@ -36,8 +33,7 @@ async def admin_get_events(
 @router.post("/events", response_model=EventResponse)
 async def admin_create_event(
     data: EventCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
+    db: AsyncSession = Depends(get_db)
 ):
     """Create a new event (admin)"""
     service = EventService(db)
@@ -50,7 +46,6 @@ async def admin_update_event(
     event_id: UUID,
     data: EventUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
 ):
     """Update an event (admin)"""
     service = EventService(db)
@@ -64,7 +59,6 @@ async def admin_update_event(
 async def admin_delete_event(
     event_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
 ):
     """Delete an event (admin)"""
     service = EventService(db)
@@ -80,7 +74,6 @@ async def admin_delete_event(
 async def admin_get_event_modules(
     event_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
 ):
     """Get all modules for an event (admin - includes disabled)"""
     service = ModuleService(db)
@@ -91,7 +84,6 @@ async def admin_get_event_modules(
 @router.get("/modules/types")
 async def admin_get_module_types(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
 ):
     """Get available module types (admin)"""
     service = ModuleService(db)
@@ -104,7 +96,6 @@ async def admin_get_module_types(
 async def admin_add_knowledge(
     data: AssistantKnowledgeCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
 ):
     """Add knowledge entry (admin)"""
     service = AssistantService(db)
@@ -120,7 +111,6 @@ async def admin_add_knowledge(
 async def admin_get_knowledge(
     event_id: UUID = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
 ):
     """Get knowledge entries (admin)"""
     service = AssistantService(db)
@@ -134,7 +124,6 @@ async def admin_get_knowledge(
 async def admin_make_user_admin(
     telegram_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
 ):
     """Make user an admin (admin)"""
     from app.services import UserService
