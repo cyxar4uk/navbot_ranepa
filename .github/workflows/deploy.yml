@@ -50,10 +50,21 @@ jobs:
             
             # Работа только с контейнерами этого проекта (используем -f для явного указания файла)
             echo "🛑 Stopping containers..."
-            docker-compose -f docker-compose.yml down
+            docker-compose -f docker-compose.yml down --remove-orphans
+            
+            echo "🧹 Cleaning old containers and images..."
+            # Удалить все контейнеры проекта
+            docker ps -a --filter "name=navbot" -q | xargs -r docker rm -f 2>/dev/null || true
+            
+            # Удалить все образы проекта
+            docker images --filter "reference=navbot_ranepa*" -q | xargs -r docker rmi -f 2>/dev/null || true
+            
+            # Очистка неиспользуемых образов
+            docker image prune -f
             
             echo "🔨 Building and starting containers..."
-            docker-compose -f docker-compose.yml up -d --build
+            docker-compose -f docker-compose.yml build --no-cache
+            docker-compose -f docker-compose.yml up -d
             
             echo "🗄️ Running database migrations..."
             sleep 5  # Ждем запуска БД
@@ -73,9 +84,9 @@ jobs:
               echo "✅ All containers are running"
             fi
             
-            # Проверка доступности backend
+            # Проверка доступности backend (порт 8001 на хосте)
             echo "🌐 Checking backend health..."
-            if curl -f http://localhost:8000/health >/dev/null 2>&1; then
+            if curl -f http://127.0.0.1:8001/health >/dev/null 2>&1; then
               echo "✅ Backend is healthy"
             else
               echo "⚠️ Backend health check failed (may need more time to start)"
