@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.models import User, KnowledgeChunk
 from app.models import KnowledgeChunk
 from app.schemas import (
     EventCreate, EventUpdate, EventResponse, EventListResponse,
@@ -11,6 +12,7 @@ from app.schemas import (
     KnowledgeChunkResponse, KnowledgeChunkRefreshRequest
 )
 from app.services import EventService, ModuleService, AssistantService, KnowledgeChunkService
+from app.api.deps import get_current_admin
 from app.api.admin_auth import get_current_admin_token
 
 router = APIRouter(dependencies=[Depends(get_current_admin_token)])
@@ -124,6 +126,8 @@ async def admin_get_knowledge(
 @router.post("/knowledge-chunks/refresh", response_model=list[KnowledgeChunkResponse])
 async def admin_refresh_knowledge_chunks(
     data: KnowledgeChunkRefreshRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
     db: AsyncSession = Depends(get_db)
 ):
     """Rebuild knowledge chunks (admin)"""
@@ -138,6 +142,8 @@ async def admin_refresh_knowledge_chunks(
 @router.get("/knowledge-chunks", response_model=list[KnowledgeChunkResponse])
 async def admin_get_knowledge_chunks(
     event_id: UUID = Query(None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
     db: AsyncSession = Depends(get_db)
 ):
     """Get knowledge chunks (admin)"""

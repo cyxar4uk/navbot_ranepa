@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # LLM
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "gpt-4-turbo-preview"
+    AGENT_CONFIG_PATH: Optional[str] = None
     
     # Redis (for caching)
     REDIS_URL: Optional[str] = None
