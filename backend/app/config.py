@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     
     # Redis (for caching)
     REDIS_URL: Optional[str] = None
+
+    # Admin panel (browser) login
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "admin"
+    ADMIN_TOKEN_EXPIRE_MINUTES: int = 120
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"

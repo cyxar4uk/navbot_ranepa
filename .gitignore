@@ -80,6 +80,11 @@ alembic/versions/*.py
 # Docker
 .docker/
 
+# Deployment
+.last_deploy_commit
+
 # Misc
 *.bak
 *.tmp
+
+

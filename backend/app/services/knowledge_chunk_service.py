@@ -87,6 +87,7 @@ class KnowledgeChunkService:
                     chunk_type=item.content_type or "global",
                     content=item.content,
                     metadata=item.metadata or {},
+                    extra_data=item.extra_data or {},
                 )
             )
         return chunks
@@ -114,6 +115,7 @@ class KnowledgeChunkService:
                 chunk_type="event",
                 content=summary,
                 metadata={},
+                extra_data={},
             )
         )
 
@@ -127,6 +129,7 @@ class KnowledgeChunkService:
                     chunk_type=item.content_type or "event_knowledge",
                     content=item.content,
                     metadata=item.metadata or {},
+                    extra_data=item.extra_data or {},
                 )
             )
 
@@ -166,6 +169,7 @@ class KnowledgeChunkService:
                     chunk_type="program",
                     content=content,
                     metadata={"item_id": str(item.id)},
+                    extra_data={"item_id": str(item.id)},
                 )
             )
 
@@ -185,6 +189,7 @@ class KnowledgeChunkService:
                     chunk_type="speaker",
                     content=text,
                     metadata={"speaker_id": str(speaker.id)},
+                    extra_data={"speaker_id": str(speaker.id)},
                 )
             )
 
@@ -200,6 +205,7 @@ class KnowledgeChunkService:
                     chunk_type="location",
                     content=text,
                     metadata={"location_id": str(location.id)},
+                    extra_data={"location_id": str(location.id)},
                 )
             )
 

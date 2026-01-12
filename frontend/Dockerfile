@@ -3,15 +3,17 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package.json ./
+COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (this layer will be cached unless package.json changes)
+RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
 # Copy source
 COPY . .
 
-# Build
+# Build with environment variable
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 # Production stage

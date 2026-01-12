@@ -16,6 +16,7 @@ class KnowledgeChunk(Base):
     chunk_type = Column(String(50), nullable=True)
     content = Column(Text, nullable=False)
     metadata = Column(JSONB, default={})
+    extra_data = Column(JSONB, default={})  # Additional metadata (renamed from metadata to avoid SQLAlchemy conflict)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

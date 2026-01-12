@@ -30,7 +30,7 @@ class AssistantKnowledgeBase(BaseModel):
     """Base schema for AssistantKnowledge"""
     content_type: Optional[str] = Field(None, max_length=50)
     content: str
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    extra_data: dict[str, Any] = Field(default_factory=dict)
 
 
 class AssistantKnowledgeCreate(AssistantKnowledgeBase):

@@ -19,8 +19,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Check if tables already exist (safe migration)
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    existing_tables = inspector.get_table_names()
+    
     # Create events table
-    op.create_table('events',
+    if 'events' not in existing_tables:
+        op.create_table('events',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('title', sa.String(length=255), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
@@ -34,7 +40,8 @@ def upgrade() -> None:
     )
 
     # Create users table
-    op.create_table('users',
+    if 'users' not in existing_tables:
+        op.create_table('users',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('telegram_id', sa.BigInteger(), nullable=False),
         sa.Column('username', sa.String(length=255), nullable=True),
@@ -48,7 +55,8 @@ def upgrade() -> None:
     )
 
     # Create zones table
-    op.create_table('zones',
+    if 'zones' not in existing_tables:
+        op.create_table('zones',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
@@ -62,7 +70,8 @@ def upgrade() -> None:
     )
 
     # Create modules table
-    op.create_table('modules',
+    if 'modules' not in existing_tables:
+        op.create_table('modules',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('type', sa.String(length=50), nullable=False),
@@ -80,7 +89,8 @@ def upgrade() -> None:
     )
 
     # Create locations table
-    op.create_table('locations',
+    if 'locations' not in existing_tables:
+        op.create_table('locations',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
@@ -96,7 +106,8 @@ def upgrade() -> None:
     )
 
     # Create speakers table
-    op.create_table('speakers',
+    if 'speakers' not in existing_tables:
+        op.create_table('speakers',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
@@ -112,7 +123,8 @@ def upgrade() -> None:
     )
 
     # Create event_items table
-    op.create_table('event_items',
+    if 'event_items' not in existing_tables:
+        op.create_table('event_items',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('module_id', postgresql.UUID(as_uuid=True), nullable=True),
@@ -125,7 +137,7 @@ def upgrade() -> None:
         sa.Column('registered_count', sa.Integer(), nullable=True, default=0),
         sa.Column('type', sa.String(length=50), nullable=True),
         sa.Column('status', sa.String(length=20), nullable=True, default='active'),
-        sa.Column('metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True, default={}),
+        sa.Column('extra_data', postgresql.JSONB(astext_type=sa.Text()), nullable=True, default={}),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.ForeignKeyConstraint(['event_id'], ['events.id'], ondelete='CASCADE'),
@@ -135,7 +147,8 @@ def upgrade() -> None:
     )
 
     # Create event_speakers table
-    op.create_table('event_speakers',
+    if 'event_speakers' not in existing_tables:
+        op.create_table('event_speakers',
         sa.Column('event_item_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('speaker_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.ForeignKeyConstraint(['event_item_id'], ['event_items.id'], ondelete='CASCADE'),
@@ -144,7 +157,8 @@ def upgrade() -> None:
     )
 
     # Create registrations table
-    op.create_table('registrations',
+    if 'registrations' not in existing_tables:
+        op.create_table('registrations',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_item_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -158,12 +172,13 @@ def upgrade() -> None:
     )
 
     # Create assistant_knowledge table
-    op.create_table('assistant_knowledge',
+    if 'assistant_knowledge' not in existing_tables:
+        op.create_table('assistant_knowledge',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column('content_type', sa.String(length=50), nullable=True),
         sa.Column('content', sa.Text(), nullable=False),
-        sa.Column('metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True, default={}),
+        sa.Column('extra_data', postgresql.JSONB(astext_type=sa.Text()), nullable=True, default={}),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.ForeignKeyConstraint(['event_id'], ['events.id'], ondelete='CASCADE'),
@@ -171,7 +186,8 @@ def upgrade() -> None:
     )
 
     # Create news table
-    op.create_table('news',
+    if 'news' not in existing_tables:
+        op.create_table('news',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('title', sa.String(length=255), nullable=False),
@@ -185,7 +201,8 @@ def upgrade() -> None:
     )
 
     # Create messages table
-    op.create_table('messages',
+    if 'messages' not in existing_tables:
+        op.create_table('messages',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('from_user_id', postgresql.UUID(as_uuid=True), nullable=False),

@@ -26,7 +26,7 @@ export default function Layout({ children }: LayoutProps) {
   }, [location.pathname, navigate])
 
   return (
-    <div className="min-h-screen tg-bg tg-text safe-area-top safe-area-bottom">
+    <div className="min-h-screen bg-background text-foreground safe-area-top safe-area-bottom">
       <main className="animate-fadeIn">
         {children}
       </main>
