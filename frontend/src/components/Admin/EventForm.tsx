@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Event } from '../../types'
 import { X, Save, Calendar } from 'lucide-react'
 
@@ -129,7 +129,7 @@ export default function EventForm({ event, onSave, onClose, saving }: EventFormP
             <label className="block text-sm font-medium text-gray-700 mb-1">Статус</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => setStatus(e.target.value as 'upcoming' | 'active' | 'finished')}
               className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="upcoming">Предстоящее</option>
