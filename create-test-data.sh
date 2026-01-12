@@ -44,10 +44,15 @@ echo ""
 echo "1️⃣ Получение JWT токена для админа..."
 echo ""
 
-# Логин админа
+# Логин админа (используем правильный формат JSON)
+LOGIN_JSON=$(cat <<JSON
+{"username": "$ADMIN_USERNAME", "password": "$ADMIN_PASSWORD"}
+JSON
+)
+
 LOGIN_RESPONSE=$(curl -s -X POST "$API_URL/admin/login" \
     -H "Content-Type: application/json" \
-    -d "{\"username\": \"$ADMIN_USERNAME\", \"password\": \"$ADMIN_PASSWORD\"}" 2>&1 || echo "ERROR")
+    -d "$LOGIN_JSON" 2>&1 || echo "ERROR")
 
 if echo "$LOGIN_RESPONSE" | grep -q "access_token"; then
     TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
@@ -101,8 +106,8 @@ if [ -z "$START_DATE" ] || [ -z "$END_DATE" ]; then
     warning "Используем фиксированные даты (может потребоваться корректировка)"
 fi
 
-# JSON для создания события
-EVENT_JSON=$(cat <<EOF
+# JSON для создания события (используем правильный формат)
+EVENT_JSON=$(cat <<JSON
 {
     "title": "Тестовое мероприятие RANEPA",
     "description": "Это тестовое мероприятие, созданное автоматически для проверки функционала системы. Вы можете редактировать или удалить его через админ панель.",
@@ -111,7 +116,7 @@ EVENT_JSON=$(cat <<EOF
     "location": "Главный корпус РАНХиГС",
     "status": "upcoming"
 }
-EOF
+JSON
 )
 
 info "Создаем событие с данными:"

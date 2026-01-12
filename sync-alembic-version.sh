@@ -126,11 +126,35 @@ else
 fi
 
 # Вставляем новую версию
-INSERT_RESULT=$(docker-compose exec -T db psql -U postgres -d navbot -t -c "INSERT INTO alembic_version (version_num) VALUES ('$TARGET_VERSION');" 2>&1)
+INSERT_RESULT=$(docker-compose exec -T db psql -U postgres -d navbot -c "INSERT INTO alembic_version (version_num) VALUES ('$TARGET_VERSION');" 2>&1)
 INSERT_EXIT_CODE=$?
 
+# Проверяем результат более тщательно
 if [ $INSERT_EXIT_CODE -eq 0 ]; then
-    success "Версия $TARGET_VERSION установлена в alembic_version"
+    # Проверяем что версия действительно установлена
+    VERIFIED=$(docker-compose exec -T db psql -U postgres -d navbot -t -c "SELECT version_num FROM alembic_version WHERE version_num = '$TARGET_VERSION';" 2>/dev/null | tr -d ' ' || echo "")
+    
+    if [ -n "$VERIFIED" ] && [ "$VERIFIED" = "$TARGET_VERSION" ]; then
+        success "Версия $TARGET_VERSION установлена в alembic_version"
+    else
+        # Возможно версия уже была установлена
+        EXISTING_VERSION=$(docker-compose exec -T db psql -U postgres -d navbot -t -c "SELECT version_num FROM alembic_version;" 2>/dev/null | tr -d ' ' || echo "")
+        
+        if [ -n "$EXISTING_VERSION" ]; then
+            if [ "$EXISTING_VERSION" = "$TARGET_VERSION" ]; then
+                success "Версия $TARGET_VERSION уже установлена в alembic_version"
+            else
+                warning "В alembic_version установлена другая версия: $EXISTING_VERSION"
+                info "Обновляем на $TARGET_VERSION..."
+                docker-compose exec -T db psql -U postgres -d navbot -c "UPDATE alembic_version SET version_num = '$TARGET_VERSION';" 2>&1
+                success "Версия обновлена на $TARGET_VERSION"
+            fi
+        else
+            error "Не удалось установить версию (таблица пуста после INSERT)"
+            error "Ошибка: $INSERT_RESULT"
+            exit 1
+        fi
+    fi
 else
     # Проверяем, может версия уже установлена
     EXISTING_VERSION=$(docker-compose exec -T db psql -U postgres -d navbot -t -c "SELECT version_num FROM alembic_version WHERE version_num = '$TARGET_VERSION';" 2>/dev/null | tr -d ' ' || echo "")
@@ -138,9 +162,23 @@ else
     if [ -n "$EXISTING_VERSION" ] && [ "$EXISTING_VERSION" = "$TARGET_VERSION" ]; then
         success "Версия $TARGET_VERSION уже установлена в alembic_version"
     else
-        error "Не удалось установить версию"
-        error "Ошибка: $INSERT_RESULT"
-        exit 1
+        # Пробуем еще раз с более явным подходом
+        warning "Первая попытка не удалась, пробуем альтернативный способ..."
+        docker-compose exec -T db psql -U postgres -d navbot <<EOF
+DELETE FROM alembic_version;
+INSERT INTO alembic_version (version_num) VALUES ('$TARGET_VERSION');
+SELECT version_num FROM alembic_version;
+EOF
+        
+        FINAL_VERSION=$(docker-compose exec -T db psql -U postgres -d navbot -t -c "SELECT version_num FROM alembic_version;" 2>/dev/null | tr -d ' ' || echo "")
+        
+        if [ -n "$FINAL_VERSION" ] && [ "$FINAL_VERSION" = "$TARGET_VERSION" ]; then
+            success "Версия $TARGET_VERSION установлена альтернативным способом"
+        else
+            error "Не удалось установить версию"
+            error "Ошибка: $INSERT_RESULT"
+            exit 1
+        fi
     fi
 fi
 
