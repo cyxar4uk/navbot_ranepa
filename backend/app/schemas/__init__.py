@@ -4,7 +4,7 @@ from app.schemas.user import UserCreate, UserResponse, TelegramAuthData
 from app.schemas.event_item import EventItemCreate, EventItemUpdate, EventItemResponse, EventItemFilter
 from app.schemas.speaker import SpeakerCreate, SpeakerUpdate, SpeakerResponse
 from app.schemas.registration import RegistrationCreate, RegistrationResponse
-from app.schemas.location import LocationCreate, LocationUpdate, LocationResponse, ZoneCreate, ZoneResponse
+from app.schemas.location import LocationCreate, LocationUpdate, LocationResponse, ZoneCreate, ZoneResponse, MapDataResponse
 from app.schemas.assistant import AssistantChatRequest, AssistantChatResponse, AssistantKnowledgeCreate, AssistantKnowledgeResponse
 from app.schemas.news import NewsCreate, NewsUpdate, NewsResponse
 from app.schemas.message import MessageCreate, MessageResponse
@@ -23,7 +23,7 @@ __all__ = [
     # Registration
     "RegistrationCreate", "RegistrationResponse",
     # Location
-    "LocationCreate", "LocationUpdate", "LocationResponse", "ZoneCreate", "ZoneResponse",
+    "LocationCreate", "LocationUpdate", "LocationResponse", "ZoneCreate", "ZoneResponse", "MapDataResponse",
     # Assistant
     "AssistantChatRequest", "AssistantChatResponse", "AssistantKnowledgeCreate", "AssistantKnowledgeResponse",
     # News
