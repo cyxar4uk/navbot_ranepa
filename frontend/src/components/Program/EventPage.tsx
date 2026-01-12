@@ -159,6 +159,15 @@ export default function EventPage() {
               <div>
                 <div className="text-sm tg-hint">Место проведения</div>
                 <div className="font-medium tg-text">{item.location_name}</div>
+                {item.location_id && (
+                  <button
+                    onClick={() => navigate(`/map?location=${item.location_id}`)}
+                    className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-50 text-primary-700 text-sm font-medium"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    Показать на карте
+                  </button>
+                )}
               </div>
             </div>
           )}

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from uuid import UUID
-from typing import Optional, Any
+from typing import Optional, Any, Literal
 
 
 class AssistantChatRequest(BaseModel):
@@ -12,10 +12,18 @@ class AssistantChatRequest(BaseModel):
     # Context can include: module_id, item_id for more specific answers
 
 
+class AssistantAction(BaseModel):
+    """Schema for assistant actions"""
+    type: Literal["open_map"]
+    label: Optional[str] = None
+    location_id: UUID
+
+
 class AssistantChatResponse(BaseModel):
     """Schema for assistant chat response"""
     response: str
     sources: list[str] = Field(default_factory=list)
+    actions: list[AssistantAction] = Field(default_factory=list)
 
 
 class AssistantKnowledgeBase(BaseModel):

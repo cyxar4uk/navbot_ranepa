@@ -20,7 +20,7 @@ class AssistantService:
         event_id: UUID,
         message: str,
         context: Optional[dict] = None
-    ) -> tuple[str, list[str]]:
+    ) -> tuple[str, list[str], list[dict]]:
         """
         Process chat message and generate response.
         
@@ -35,7 +35,7 @@ class AssistantService:
         # Get event info
         event = await self.db.get(Event, event_id)
         if not event:
-            return "Мероприятие не найдено.", []
+            return "Мероприятие не найдено.", [], []
         
         chunk_service = KnowledgeChunkService(self.db)
         # Build knowledge base
@@ -56,8 +56,22 @@ class AssistantService:
         
         # Extract sources (simplified - just mention knowledge was used)
         sources = ["База знаний мероприятия"] if knowledge_base else []
-        
-        return response, sources
+
+        actions: list[dict] = []
+        try:
+            item_id = (context or {}).get("item_id")
+            if item_id:
+                item = await self.db.get(EventItem, item_id)
+                if item and item.location_id:
+                    actions.append({
+                        "type": "open_map",
+                        "label": "Открыть на карте",
+                        "location_id": item.location_id,
+                    })
+        except Exception:
+            pass
+
+        return response, sources, actions
     
     async def _build_knowledge_base(
         self,
