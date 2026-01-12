@@ -45,7 +45,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       SECRET_KEY: ${SECRET_KEY:-your-secret-key}
     ports:
-      - "${BACKEND_PORT:-8000}:8000"  # Можно изменить через переменную окружения
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"  # Только локальный доступ для nginx reverse proxy
     depends_on:
       db:
         condition: service_healthy
@@ -60,7 +60,7 @@ services:
       dockerfile: Dockerfile
     container_name: navbot-frontend
     ports:
-      - "${FRONTEND_PORT:-3000}:80"  # Можно изменить через переменную окружения
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:80"  # Только локальный доступ для nginx reverse proxy
     depends_on:
       - backend
 
