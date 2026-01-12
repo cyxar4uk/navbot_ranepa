@@ -58,6 +58,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://testingsmth.anyway-community.ru/api}
     container_name: navbot-frontend
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-3000}:80"  # Только локальный доступ для nginx reverse proxy
