@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { OTPInput, OTPInputContext } from "input-otp@1.4.2";
@@ -44,7 +44,7 @@ function InputOTPSlot({
   index: number;
 }) {
   const inputOTPContext = React.useContext(OTPInputContext);
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {};
+  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots?.[index] ?? {};
 
   return (
     <div
