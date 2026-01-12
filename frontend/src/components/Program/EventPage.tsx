@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEvent } from '../../context/EventContext'
 import api from '../../services/api'
 import telegram from '../../services/telegram'
 import Loading from '../common/Loading'

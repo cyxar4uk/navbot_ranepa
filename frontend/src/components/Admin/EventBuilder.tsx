@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useUser } from '../../context/UserContext'
 import api from '../../services/api'
 import Loading from '../common/Loading'
