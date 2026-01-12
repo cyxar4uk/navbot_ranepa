@@ -10,8 +10,9 @@ from app.schemas import (
 )
 from app.services import EventService, ModuleService, AssistantService
 from app.api.deps import get_current_admin
+from app.api.admin_auth import get_current_admin_token
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_admin_token)])
 
 
 # ==================== Events Management ====================

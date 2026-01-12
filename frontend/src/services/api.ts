@@ -21,6 +21,14 @@ class ApiClient {
     this.token = token
   }
 
+  setTokenFromStorage(key = 'admin_token') {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem(key)
+    if (stored) {
+      this.setToken(stored)
+    }
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
