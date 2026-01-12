@@ -11,8 +11,9 @@ services:
       POSTGRES_DB: navbot
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # Порт не пробрасываем наружу, используется только внутри Docker сети
+    # ports:
+    #   - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -23,8 +24,9 @@ services:
   redis:
     image: redis:7-alpine
     container_name: navbot-redis
-    ports:
-      - "6379:6379"
+    # Порт не пробрасываем наружу, используется только внутри Docker сети
+    # ports:
+    #   - "6379:6379"
     volumes:
       - redis_data:/data
 
@@ -43,7 +45,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       SECRET_KEY: ${SECRET_KEY:-your-secret-key}
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"  # Можно изменить через переменную окружения
     depends_on:
       db:
         condition: service_healthy
@@ -58,7 +60,7 @@ services:
       dockerfile: Dockerfile
     container_name: navbot-frontend
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:80"  # Можно изменить через переменную окружения
     depends_on:
       - backend
 
