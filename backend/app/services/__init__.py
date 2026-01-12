@@ -13,4 +13,5 @@ __all__ = [
     "EventItemService",
     "RegistrationService",
     "AssistantService",
+    "KnowledgeChunkService",
 ]
