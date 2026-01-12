@@ -33,7 +33,20 @@ jobs:
             fi
             
             # Обновление кода только этого репозитория
-            git pull origin main || git pull origin master
+            # Делаем hard reset для синхронизации с репозиторием (локальные изменения будут потеряны)
+            echo "📥 Fetching latest changes..."
+            git fetch origin
+            
+            # Определяем текущую ветку
+            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            REMOTE_BRANCH="origin/main"
+            if [ "$CURRENT_BRANCH" = "master" ] || git rev-parse --verify origin/master >/dev/null 2>&1; then
+              REMOTE_BRANCH="origin/master"
+            fi
+            
+            echo "🔄 Resetting to $REMOTE_BRANCH..."
+            git reset --hard $REMOTE_BRANCH
+            git clean -fd  # Удаляем неотслеживаемые файлы
             
             # Работа только с контейнерами этого проекта (используем -f для явного указания файла)
             docker-compose -f docker-compose.yml down
