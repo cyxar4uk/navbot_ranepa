@@ -86,7 +86,6 @@ class KnowledgeChunkService:
                     event_id=None,
                     chunk_type=item.content_type or "global",
                     content=item.content,
-                    metadata=item.metadata or {},
                     extra_data=item.extra_data or {},
                 )
             )
@@ -128,7 +127,6 @@ class KnowledgeChunkService:
                     event_id=event.id,
                     chunk_type=item.content_type or "event_knowledge",
                     content=item.content,
-                    metadata=item.metadata or {},
                     extra_data=item.extra_data or {},
                 )
             )
@@ -168,7 +166,6 @@ class KnowledgeChunkService:
                     event_id=event.id,
                     chunk_type="program",
                     content=content,
-                    metadata={"item_id": str(item.id)},
                     extra_data={"item_id": str(item.id)},
                 )
             )
@@ -204,7 +201,6 @@ class KnowledgeChunkService:
                     event_id=event.id,
                     chunk_type="location",
                     content=text,
-                    metadata={"location_id": str(location.id)},
                     extra_data={"location_id": str(location.id)},
                 )
             )

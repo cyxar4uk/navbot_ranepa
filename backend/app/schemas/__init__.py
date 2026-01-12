@@ -4,8 +4,6 @@ from app.schemas.user import UserCreate, UserResponse, TelegramAuthData
 from app.schemas.event_item import EventItemCreate, EventItemUpdate, EventItemResponse, EventItemFilter
 from app.schemas.speaker import SpeakerCreate, SpeakerUpdate, SpeakerResponse
 from app.schemas.registration import RegistrationCreate, RegistrationResponse
-from app.schemas.location import LocationCreate, LocationUpdate, LocationResponse, ZoneCreate, ZoneResponse
-from app.schemas.assistant import AssistantChatRequest, AssistantChatResponse, AssistantKnowledgeCreate
 from app.schemas.location import LocationCreate, LocationUpdate, LocationResponse, ZoneCreate, ZoneResponse, MapDataResponse
 from app.schemas.assistant import AssistantChatRequest, AssistantChatResponse, AssistantKnowledgeCreate, AssistantKnowledgeResponse
 from app.schemas.knowledge_chunk import KnowledgeChunkResponse, KnowledgeChunkRefreshRequest
