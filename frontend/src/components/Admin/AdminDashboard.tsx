@@ -4,6 +4,7 @@ import api from '../../services/api'
 import Loading from '../common/Loading'
 import ErrorMessage from '../common/ErrorMessage'
 import EmptyState from '../common/EmptyState'
+import EventForm from './EventForm'
 import type { Event } from '../../types'
 import { Plus, Calendar, Settings, ChevronRight } from 'lucide-react'
 
@@ -13,6 +14,8 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showEventForm, setShowEventForm] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     // Подхватить токен из localStorage
@@ -35,6 +38,20 @@ export default function AdminDashboard() {
       setError('Не удалось загрузить мероприятия')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCreateEvent = async (data: Partial<Event>) => {
+    try {
+      setSaving(true)
+      const newEvent = await api.adminCreateEvent(data)
+      setEvents(prev => [...prev, newEvent])
+      setShowEventForm(false)
+    } catch (err) {
+      console.error('Failed to create event:', err)
+      alert('Не удалось создать мероприятие')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -102,7 +119,7 @@ export default function AdminDashboard() {
             description="Создайте первое мероприятие"
             action={
               <button
-                onClick={() => {/* TODO: Open create modal */}}
+                onClick={() => setShowEventForm(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg tg-button"
               >
                 <Plus className="w-4 h-4" />
@@ -136,11 +153,20 @@ export default function AdminDashboard() {
 
       {/* FAB */}
       <button
-        onClick={() => {/* TODO: Open create modal */}}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary-500 text-white shadow-lg flex items-center justify-center hover:bg-primary-600 transition-colors"
+        onClick={() => setShowEventForm(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
       >
         <Plus className="w-6 h-6" />
       </button>
+
+      {/* Event Form Modal */}
+      {showEventForm && (
+        <EventForm
+          onSave={handleCreateEvent}
+          onClose={() => setShowEventForm(false)}
+          saving={saving}
+        />
+      )}
     </div>
   )
 }
