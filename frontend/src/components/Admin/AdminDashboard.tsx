@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useUser } from '../../context/UserContext'
 import api from '../../services/api'
 import Loading from '../common/Loading'
 import ErrorMessage from '../common/ErrorMessage'
@@ -9,7 +8,6 @@ import type { Event } from '../../types'
 import { Plus, Calendar, Settings, ChevronRight, Shield } from 'lucide-react'
 
 export default function AdminDashboard() {
-  const { isAdmin, loading: userLoading } = useUser()
   const navigate = useNavigate()
   
   const [events, setEvents] = useState<Event[]>([])
@@ -17,10 +15,15 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isAdmin) {
-      loadEvents()
+    // Подхватить токен из localStorage
+    api.setTokenFromStorage()
+    const token = localStorage.getItem('admin_token')
+    if (!token) {
+      navigate('/admin/login')
+      return
     }
-  }, [isAdmin])
+    loadEvents()
+  }, [navigate])
 
   const loadEvents = async () => {
     try {
@@ -35,20 +38,10 @@ export default function AdminDashboard() {
     }
   }
 
-  if (userLoading) {
+  // Если токена нет, будет редирект, а пока можно отобразить загрузку
+  const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null
+  if (!token) {
     return <Loading text="Проверка доступа..." fullScreen />
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <EmptyState
-          icon={<Shield className="w-12 h-12" />}
-          title="Доступ запрещён"
-          description="У вас нет прав администратора"
-        />
-      </div>
-    )
   }
 
   if (loading) {

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { useUser } from '../../context/UserContext'
+import { useParams, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import Loading from '../common/Loading'
 import ErrorMessage from '../common/ErrorMessage'
@@ -13,7 +12,7 @@ import {
 
 export default function EventBuilder() {
   const { eventId } = useParams<{ eventId: string }>()
-  const { isAdmin } = useUser()
+  const navigate = useNavigate()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [modules, setModules] = useState<Module[]>([])
@@ -25,10 +24,16 @@ export default function EventBuilder() {
   const [showAddModule, setShowAddModule] = useState(false)
 
   useEffect(() => {
-    if (eventId && isAdmin) {
+    api.setTokenFromStorage()
+    const token = localStorage.getItem('admin_token')
+    if (!token) {
+      navigate('/admin/login')
+      return
+    }
+    if (eventId) {
       loadData()
     }
-  }, [eventId, isAdmin])
+  }, [eventId, navigate])
 
   const loadData = async () => {
     if (!eventId) return
