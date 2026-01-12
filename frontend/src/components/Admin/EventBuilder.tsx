@@ -7,14 +7,13 @@ import ErrorMessage from '../common/ErrorMessage'
 import ModuleConfig from './ModuleConfig'
 import type { Event, Module, ModuleTypeDefinition } from '../../types'
 import { 
-  Save, Plus, GripVertical, ToggleLeft, ToggleRight, 
+  Plus, ToggleLeft, ToggleRight, 
   Trash2, Settings, ChevronDown, ChevronUp 
 } from 'lucide-react'
 
 export default function EventBuilder() {
   const { eventId } = useParams<{ eventId: string }>()
   const { isAdmin } = useUser()
-  const navigate = useNavigate()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [modules, setModules] = useState<Module[]>([])
@@ -85,7 +84,7 @@ export default function EventBuilder() {
     try {
       const module = await api.createModule({
         event_id: eventId,
-        type: type,
+        type: type as Module['type'],
         title: typeInfo.name,
         config: typeInfo.default_config,
       })

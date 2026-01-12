@@ -9,7 +9,7 @@ import type { Event } from '../../types'
 import { Plus, Calendar, Settings, ChevronRight, Shield } from 'lucide-react'
 
 export default function AdminDashboard() {
-  const { user, isAdmin, loading: userLoading } = useUser()
+  const { isAdmin, loading: userLoading } = useUser()
   const navigate = useNavigate()
   
   const [events, setEvents] = useState<Event[]>([])

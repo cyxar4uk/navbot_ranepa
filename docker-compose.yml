@@ -1,5 +1,8 @@
 version: '3.8'
 
+# Имя проекта для изоляции от других docker-compose проектов
+name: navbot_ranepa
+
 services:
   # PostgreSQL Database
   db:

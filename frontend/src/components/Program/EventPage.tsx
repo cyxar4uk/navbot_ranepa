@@ -10,7 +10,6 @@ import { Calendar, Clock, MapPin, Users, MessageCircle } from 'lucide-react'
 
 export default function EventPage() {
   const { itemId } = useParams<{ itemId: string }>()
-  const { event } = useEvent()
   const navigate = useNavigate()
   
   const [item, setItem] = useState<EventItem | null>(null)
