@@ -13,6 +13,8 @@ import NewsView from './components/News/NewsView'
 import CustomPage from './components/CustomPage/CustomPage'
 import AdminDashboard from './components/Admin/AdminDashboard'
 import EventBuilder from './components/Admin/EventBuilder'
+import AdminGuard from './components/Admin/AdminGuard'
+import AdminLogin from './components/Admin/AdminLogin'
 
 function App() {
   return (
@@ -33,8 +35,11 @@ function App() {
               <Route path="/page/:moduleId" element={<CustomPage />} />
               
               {/* Admin routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/events/:eventId" element={<EventBuilder />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route element={<AdminGuard />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/events/:eventId" element={<EventBuilder />} />
+              </Route>
             </Routes>
           </Layout>
         </EventProvider>

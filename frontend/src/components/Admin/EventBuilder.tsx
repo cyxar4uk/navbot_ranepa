@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { useUser } from '../../context/UserContext'
+import { useParams, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import Loading from '../common/Loading'
 import ErrorMessage from '../common/ErrorMessage'
 import ModuleConfig from './ModuleConfig'
+import EventForm from './EventForm'
 import type { Event, Module, ModuleTypeDefinition } from '../../types'
 import { 
   Plus, ToggleLeft, ToggleRight, 
-  Trash2, Settings, ChevronDown, ChevronUp 
+  Trash2, Settings, ChevronDown, ChevronUp, Edit2, ArrowLeft
 } from 'lucide-react'
 
 export default function EventBuilder() {
   const { eventId } = useParams<{ eventId: string }>()
-  const { isAdmin } = useUser()
+  const navigate = useNavigate()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [modules, setModules] = useState<Module[]>([])
@@ -23,12 +23,19 @@ export default function EventBuilder() {
   const [saving, setSaving] = useState(false)
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [showAddModule, setShowAddModule] = useState(false)
+  const [showEventForm, setShowEventForm] = useState(false)
 
   useEffect(() => {
-    if (eventId && isAdmin) {
+    api.setTokenFromStorage()
+    const token = localStorage.getItem('admin_token')
+    if (!token) {
+      navigate('/admin/login')
+      return
+    }
+    if (eventId) {
       loadData()
     }
-  }, [eventId, isAdmin])
+  }, [eventId, navigate])
 
   const loadData = async () => {
     if (!eventId) return
@@ -130,8 +137,19 @@ export default function EventBuilder() {
     }
   }
 
-  if (!isAdmin) {
-    return <ErrorMessage message="Доступ запрещён" />
+  const handleUpdateEvent = async (data: Partial<Event>) => {
+    if (!eventId) return
+    try {
+      setSaving(true)
+      const updated = await api.adminUpdateEvent(eventId, data)
+      setEvent(updated)
+      setShowEventForm(false)
+    } catch (err) {
+      console.error('Failed to update event:', err)
+      alert('Не удалось обновить мероприятие')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) {
@@ -146,11 +164,29 @@ export default function EventBuilder() {
     <div className="min-h-screen pb-6">
       {/* Header */}
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white px-4 pt-6 pb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <Settings className="w-5 h-5" />
-          <span className="text-sm text-gray-400">Event Builder</span>
+        <div className="flex items-center gap-3 mb-2">
+          <button
+            onClick={() => navigate('/admin')}
+            className="p-2 rounded-lg hover:bg-white/10"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2 flex-1">
+            <Settings className="w-5 h-5" />
+            <span className="text-sm text-gray-400">Event Builder</span>
+          </div>
+          <button
+            onClick={() => setShowEventForm(true)}
+            className="p-2 rounded-lg hover:bg-white/10"
+            title="Редактировать мероприятие"
+          >
+            <Edit2 className="w-5 h-5" />
+          </button>
         </div>
         <h1 className="text-xl font-bold">{event.title}</h1>
+        <p className="text-sm text-gray-300 mt-1">
+          {new Date(event.date_start).toLocaleDateString('ru-RU')} – {new Date(event.date_end).toLocaleDateString('ru-RU')}
+        </p>
       </div>
 
       {/* Modules */}
@@ -266,6 +302,16 @@ export default function EventBuilder() {
           module={selectedModule}
           onSave={(config) => handleSaveConfig(selectedModule.id, config)}
           onClose={() => setSelectedModule(null)}
+          saving={saving}
+        />
+      )}
+
+      {/* Event Form Modal */}
+      {showEventForm && event && (
+        <EventForm
+          event={event}
+          onSave={handleUpdateEvent}
+          onClose={() => setShowEventForm(false)}
           saving={saving}
         />
       )}

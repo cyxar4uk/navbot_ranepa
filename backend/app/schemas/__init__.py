@@ -24,9 +24,9 @@ __all__ = [
     # Registration
     "RegistrationCreate", "RegistrationResponse",
     # Location
-    "LocationCreate", "LocationUpdate", "LocationResponse", "ZoneCreate", "ZoneResponse",
+    "LocationCreate", "LocationUpdate", "LocationResponse", "ZoneCreate", "ZoneResponse", "MapDataResponse",
     # Assistant
-    "AssistantChatRequest", "AssistantChatResponse", "AssistantKnowledgeCreate",
+    "AssistantChatRequest", "AssistantChatResponse", "AssistantKnowledgeCreate", "AssistantKnowledgeResponse",
     # News
     "NewsCreate", "NewsUpdate", "NewsResponse",
     # Message
