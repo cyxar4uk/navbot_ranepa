@@ -138,8 +138,6 @@ async def admin_refresh_knowledge_chunks(
 @router.get("/knowledge-chunks", response_model=list[KnowledgeChunkResponse])
 async def admin_get_knowledge_chunks(
     event_id: UUID = Query(None),
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
     db: AsyncSession = Depends(get_db)
 ):
     """Get knowledge chunks (admin)"""
