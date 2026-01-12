@@ -1,14 +1,17 @@
 from uuid import UUID
+from sqlalchemy import select
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.models import User, KnowledgeChunk
 from app.schemas import (
     EventCreate, EventUpdate, EventResponse, EventListResponse,
-    ModuleResponse, AssistantKnowledgeCreate, AssistantKnowledgeResponse
+    ModuleResponse, AssistantKnowledgeCreate, AssistantKnowledgeResponse,
+    KnowledgeChunkResponse, KnowledgeChunkRefreshRequest
 )
-from app.services import EventService, ModuleService, AssistantService
-from app.api.admin_auth import get_current_admin_token
+from app.services import EventService, ModuleService, AssistantService, KnowledgeChunkService
+from app.api.deps import get_current_admin
 
 router = APIRouter(dependencies=[Depends(get_current_admin_token)])
 
@@ -116,6 +119,39 @@ async def admin_get_knowledge(
     service = AssistantService(db)
     knowledge = await service.get_knowledge(event_id)
     return [AssistantKnowledgeResponse.model_validate(k) for k in knowledge]
+
+
+@router.post("/knowledge-chunks/refresh", response_model=list[KnowledgeChunkResponse])
+async def admin_refresh_knowledge_chunks(
+    data: KnowledgeChunkRefreshRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Rebuild knowledge chunks (admin)"""
+    service = KnowledgeChunkService(db)
+    if data.event_id:
+        chunks = await service.refresh_event_chunks(data.event_id)
+    else:
+        chunks = await service.refresh_global_chunks()
+    return [KnowledgeChunkResponse.model_validate(chunk) for chunk in chunks]
+
+
+@router.get("/knowledge-chunks", response_model=list[KnowledgeChunkResponse])
+async def admin_get_knowledge_chunks(
+    event_id: UUID = Query(None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Get knowledge chunks (admin)"""
+    query = select(KnowledgeChunk)
+    if event_id:
+        query = query.where(
+            (KnowledgeChunk.event_id == event_id) | (KnowledgeChunk.event_id.is_(None))
+        )
+    else:
+        query = query.where(KnowledgeChunk.event_id.is_(None))
+    result = await db.execute(query)
+    return [KnowledgeChunkResponse.model_validate(chunk) for chunk in result.scalars().all()]
 
 
 # ==================== User Management ====================

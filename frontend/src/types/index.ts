@@ -160,7 +160,15 @@ export interface AssistantChatRequest {
 export interface AssistantChatResponse {
   response: string
   sources: string[]
+  actions?: AssistantAction[]
 }
+
+export type AssistantAction =
+  | {
+      type: 'open_map'
+      label?: string
+      location_id: string
+    }
 
 // Module type definitions
 export interface ModuleTypeDefinition {

@@ -1,17 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEvent } from '../../context/EventContext'
 import api from '../../services/api'
 import telegram from '../../services/telegram'
-import type { AssistantMessage } from '../../types'
+import type { AssistantMessage, AssistantAction } from '../../types'
 import { Send, Bot, User } from 'lucide-react'
 
 export default function ChatInterface() {
   const { event } = useEvent()
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const itemId = searchParams.get('item')
   
-  const [messages, setMessages] = useState<AssistantMessage[]>([])
+  type UIMessage = AssistantMessage & { actions?: AssistantAction[] }
+  const [messages, setMessages] = useState<UIMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -56,10 +58,11 @@ export default function ChatInterface() {
         context: itemId ? { item_id: itemId } : undefined,
       })
 
-      const assistantMessage: AssistantMessage = {
+      const assistantMessage: UIMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: response.response,
+        actions: response.actions || [],
         timestamp: new Date(),
       }
 
@@ -129,6 +132,24 @@ export default function ChatInterface() {
               }`}
             >
               <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              {message.role === 'assistant' && message.actions && message.actions.length > 0 && (
+                <div className="mt-3 flex flex-col gap-2">
+                  {message.actions.map((action, index) => {
+                    if (action.type === 'open_map') {
+                      return (
+                        <button
+                          key={`${action.type}-${index}`}
+                          onClick={() => navigate(`/map?location=${action.location_id}`)}
+                          className="w-full py-3 rounded-xl tg-button font-medium"
+                        >
+                          {action.label || 'Открыть на карте'}
+                        </button>
+                      )
+                    }
+                    return null
+                  })}
+                </div>
+              )}
             </div>
           </div>
         ))}

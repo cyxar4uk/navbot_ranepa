@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useEvent } from '../../context/EventContext'
 import api from '../../services/api'
 import Loading from '../common/Loading'
@@ -9,6 +10,8 @@ import { MapPin, ChevronUp, ChevronDown, X } from 'lucide-react'
 
 export default function MapView() {
   const { event } = useEvent()
+  const [searchParams] = useSearchParams()
+  const locationParam = searchParams.get('location')
   
   const [mapData, setMapData] = useState<MapData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -34,6 +37,16 @@ export default function MapView() {
       const floors = [...new Set(data.locations.map(l => l.floor).filter(Boolean))]
       if (floors.length > 0) {
         setSelectedFloor(Math.min(...floors as number[]))
+      }
+
+      if (locationParam) {
+        const target = data.locations.find(location => location.id === locationParam)
+        if (target) {
+          if (target.floor) {
+            setSelectedFloor(target.floor)
+          }
+          setSelectedLocation(target)
+        }
       }
     } catch (err) {
       console.error('Failed to load map data:', err)

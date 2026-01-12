@@ -18,10 +18,10 @@ async def chat(
 ):
     """Send message to AI assistant"""
     service = AssistantService(db)
-    response, sources = await service.chat(
+    response, sources, actions = await service.chat(
         event_id=data.event_id,
         message=data.message,
         context=data.context
     )
     
-    return AssistantChatResponse(response=response, sources=sources)
+    return AssistantChatResponse(response=response, sources=sources, actions=actions)
