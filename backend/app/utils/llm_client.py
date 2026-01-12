@@ -1,4 +1,6 @@
 from typing import Optional
+import json
+from pathlib import Path
 import httpx
 from openai import AsyncOpenAI
 
@@ -10,6 +12,7 @@ class LLMClient:
     
     def __init__(self):
         self.client: Optional[AsyncOpenAI] = None
+        self._agent_config: Optional[dict] = None
         if settings.OPENAI_API_KEY:
             self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
     
@@ -72,24 +75,78 @@ class LLMClient:
             System prompt string
         """
         knowledge_text = "\n\n".join(knowledge_base) if knowledge_base else "Нет дополнительной информации."
+        agent_prompt = self._build_agent_prompt()
         
-        return f"""Ты - AI-ассистент навигационного бота мероприятия "{event_name}" в Президентской Академии (РАНХиГС).
+        prompt = f"""Ты — AI-ассистент навигационного бота мероприятия "{event_name}" в Президентской Академии (РАНХиГС).
 
-Твоя задача - помогать посетителям с вопросами о:
+Ты работаешь ТОЛЬКО в рамках текущего мероприятия и предоставленного контекста.
+
+Твоя задача — помогать посетителям с вопросами о:
 - Программе мероприятия (расписание, спикеры, темы)
-- Навигации по Академии (как найти аудитории, залы)
+- Навигации по Академии (аудитории, залы, входы, сервисные точки)
 - Регистрации на события
 - Общей информации о мероприятии
 
-Правила:
-1. Отвечай ТОЛЬКО на основе предоставленной информации
-2. Если не знаешь ответа - честно скажи об этом и предложи обратиться к организаторам
-3. Будь вежлив и дружелюбен
-4. Отвечай кратко и по существу
-5. Используй русский язык
+Алгоритм работы:
+1) Определи тип запроса (информация о мероприятии, навигация, программа, спикеры, сервисные точки).
+2) Используй ТОЛЬКО предоставленные данные и контекст.
+3) Если данных недостаточно — задай ОДИН уточняющий вопрос.
+4) Сформируй краткий, практичный ответ.
 
-База знаний о мероприятии:
+Правила:
+1. Отвечай ТОЛЬКО на основе предоставленной информации.
+2. Не выдумывай факты, аудитории, время, спикеров или маршруты.
+3. Если не знаешь ответа — честно скажи об этом и предложи обратиться к организаторам.
+4. Будь вежлив и дружелюбен.
+5. Отвечай кратко и по существу.
+6. Используй русский язык.
+
+Bаза знаний о мероприятии:
 {knowledge_text}"""
+
+        if agent_prompt:
+            return f"{prompt}\n\nДополнительные инструкции агента:\n{agent_prompt}"
+
+        return prompt
+
+    def _build_agent_prompt(self) -> str:
+        config = self._get_agent_config()
+        if not config:
+            return ""
+
+        parts: list[str] = []
+        for key in ("system_prompt", "prompt", "instructions"):
+            value = config.get(key)
+            if isinstance(value, str) and value.strip():
+                parts.append(value.strip())
+            elif isinstance(value, list):
+                items = [str(item).strip() for item in value if str(item).strip()]
+                if items:
+                    parts.append("\n".join(items))
+
+        return "\n\n".join(parts).strip()
+
+    def _get_agent_config(self) -> Optional[dict]:
+        if self._agent_config is not None:
+            return self._agent_config
+
+        if not settings.AGENT_CONFIG_PATH:
+            self._agent_config = None
+            return self._agent_config
+
+        path = Path(settings.AGENT_CONFIG_PATH)
+        if not path.exists():
+            self._agent_config = None
+            return self._agent_config
+
+        try:
+            with path.open("r", encoding="utf-8") as file:
+                data = json.load(file)
+            self._agent_config = data if isinstance(data, dict) else None
+        except (OSError, json.JSONDecodeError):
+            self._agent_config = None
+
+        return self._agent_config
 
 
 # Global instance

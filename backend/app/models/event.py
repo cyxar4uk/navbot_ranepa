@@ -28,6 +28,7 @@ class Event(Base):
     locations = relationship("Location", back_populates="event", cascade="all, delete-orphan")
     zones = relationship("Zone", back_populates="event", cascade="all, delete-orphan")
     assistant_knowledge = relationship("AssistantKnowledge", back_populates="event", cascade="all, delete-orphan")
+    knowledge_chunks = relationship("KnowledgeChunk", back_populates="event", cascade="all, delete-orphan")
     news = relationship("News", back_populates="event", cascade="all, delete-orphan")
     
     def __repr__(self):

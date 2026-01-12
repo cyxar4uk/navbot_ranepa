@@ -1,9 +1,11 @@
 from uuid import UUID
 from typing import Optional
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Event, EventItem, AssistantKnowledge, Speaker, Location
+from app.models import Event, EventItem, AssistantKnowledge, EventSpeaker, KnowledgeChunk
+from app.services.knowledge_chunk_service import KnowledgeChunkService
 from app.utils.llm_client import llm_client
 
 
@@ -18,7 +20,7 @@ class AssistantService:
         event_id: UUID,
         message: str,
         context: Optional[dict] = None
-    ) -> tuple[str, list[str]]:
+    ) -> tuple[str, list[str], list[dict]]:
         """
         Process chat message and generate response.
         
@@ -33,10 +35,11 @@ class AssistantService:
         # Get event info
         event = await self.db.get(Event, event_id)
         if not event:
-            return "Мероприятие не найдено.", []
+            return "Мероприятие не найдено.", [], []
         
+        chunk_service = KnowledgeChunkService(self.db)
         # Build knowledge base
-        knowledge_base = await self._build_knowledge_base(event_id, context)
+        knowledge_base = await self._build_knowledge_base(event, message, chunk_service)
         
         # Build system prompt
         system_prompt = llm_client.build_system_prompt(event.title, knowledge_base)
@@ -53,64 +56,47 @@ class AssistantService:
         
         # Extract sources (simplified - just mention knowledge was used)
         sources = ["База знаний мероприятия"] if knowledge_base else []
-        
-        return response, sources
+
+        actions: list[dict] = []
+        try:
+            item_id = (context or {}).get("item_id")
+            if item_id:
+                item = await self.db.get(EventItem, item_id)
+                if item and item.location_id:
+                    actions.append({
+                        "type": "open_map",
+                        "label": "Открыть на карте",
+                        "location_id": item.location_id,
+                    })
+        except Exception:
+            pass
+
+        return response, sources, actions
     
     async def _build_knowledge_base(
         self,
-        event_id: UUID,
-        context: Optional[dict] = None
+        event: Event,
+        message: str,
+        chunk_service: KnowledgeChunkService
     ) -> list[str]:
         """Build knowledge base for the assistant"""
-        knowledge_items = []
-        
-        # Get global knowledge
-        global_query = select(AssistantKnowledge).where(
-            AssistantKnowledge.event_id.is_(None)
+        knowledge_items: list[str] = []
+
+        result = await self.db.execute(
+            select(KnowledgeChunk).where(KnowledgeChunk.event_id == event.id)
         )
-        result = await self.db.execute(global_query)
-        for item in result.scalars().all():
-            knowledge_items.append(f"[{item.content_type or 'Общее'}]: {item.content}")
-        
-        # Get event-specific knowledge
-        event_query = select(AssistantKnowledge).where(
-            AssistantKnowledge.event_id == event_id
+        if result.scalars().first() is None:
+            await chunk_service.refresh_event_chunks(event.id)
+
+        result = await self.db.execute(
+            select(KnowledgeChunk).where(KnowledgeChunk.event_id.is_(None))
         )
-        result = await self.db.execute(event_query)
-        for item in result.scalars().all():
-            knowledge_items.append(f"[{item.content_type or 'Мероприятие'}]: {item.content}")
-        
-        # Add event items info
-        items_query = select(EventItem).where(EventItem.event_id == event_id).limit(50)
-        result = await self.db.execute(items_query)
-        for item in result.scalars().all():
-            time_str = ""
-            if item.date_start:
-                time_str = item.date_start.strftime("%d.%m %H:%M")
-                if item.date_end:
-                    time_str += f" - {item.date_end.strftime('%H:%M')}"
-            
-            knowledge_items.append(
-                f"[Программа] {item.title}: {time_str}. {item.description or ''}"
-            )
-        
-        # Add speakers info
-        speakers_query = select(Speaker).where(Speaker.event_id == event_id)
-        result = await self.db.execute(speakers_query)
-        for speaker in result.scalars().all():
-            knowledge_items.append(
-                f"[Спикер] {speaker.name}: {speaker.position or ''} {speaker.company or ''}. {speaker.bio or ''}"
-            )
-        
-        # Add locations info
-        locations_query = select(Location).where(Location.event_id == event_id)
-        result = await self.db.execute(locations_query)
-        for location in result.scalars().all():
-            floor_str = f"Этаж {location.floor}" if location.floor else ""
-            knowledge_items.append(
-                f"[Локация] {location.name}: {floor_str}. {location.description or ''}"
-            )
-        
+        if result.scalars().first() is None:
+            await chunk_service.refresh_global_chunks()
+
+        relevant_chunks = await chunk_service.get_relevant_chunks(event.id, message)
+        knowledge_items.extend([chunk.content for chunk in relevant_chunks])
+
         return knowledge_items
     
     async def _build_context_string(
@@ -126,11 +112,32 @@ class AssistantService:
         
         # Add specific event item context
         if context.get("item_id"):
-            item = await self.db.get(EventItem, context["item_id"])
+            item = await self.db.get(
+                EventItem,
+                context["item_id"],
+                options=[
+                    selectinload(EventItem.location),
+                    selectinload(EventItem.speakers).selectinload(EventSpeaker.speaker),
+                ]
+            )
             if item:
                 parts.append(f"Пользователь смотрит: {item.title}")
+                if item.date_start:
+                    time_str = item.date_start.strftime("%d.%m %H:%M")
+                    if item.date_end:
+                        time_str += f" - {item.date_end.strftime('%H:%M')}"
+                    parts.append(f"Время: {time_str}")
+                if item.location:
+                    parts.append(f"Локация: {item.location.name}")
                 if item.description:
                     parts.append(f"Описание: {item.description}")
+                speakers = [
+                    event_speaker.speaker.name
+                    for event_speaker in item.speakers
+                    if event_speaker.speaker
+                ]
+                if speakers:
+                    parts.append(f"Спикеры: {', '.join(speakers)}")
         
         return "\n".join(parts)
     
@@ -149,6 +156,11 @@ class AssistantService:
         self.db.add(knowledge)
         await self.db.flush()
         await self.db.refresh(knowledge)
+        chunk_service = KnowledgeChunkService(self.db)
+        if event_id:
+            await chunk_service.refresh_event_chunks(event_id)
+        else:
+            await chunk_service.refresh_global_chunks()
         return knowledge
     
     async def get_knowledge(self, event_id: Optional[UUID] = None) -> list[AssistantKnowledge]:
