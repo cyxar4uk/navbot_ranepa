@@ -92,6 +92,36 @@ async def callback_open_app(callback: types.CallbackQuery):
     )
 
 
+@router.message(F.text.in_(["admin", "админ", "админка", "панель администратора"]))
+async def handle_admin_message(message: types.Message):
+    """Handle admin panel request message"""
+    from app.config import settings
+    from app.bot.keyboards import get_admin_keyboard
+    
+    admin_url = f"{settings.TELEGRAM_WEBAPP_URL}/admin" if settings.TELEGRAM_WEBAPP_URL else None
+    
+    if admin_url:
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="🔐 Открыть админ панель",
+                        web_app=WebAppInfo(url=admin_url)
+                    )
+                ]
+            ]
+        )
+        await message.answer(
+            "🔐 Перейдите в админ панель для управления мероприятиями:",
+            reply_markup=keyboard
+        )
+    else:
+        await message.answer(
+            "⚠️ Админ панель недоступна. URL не настроен в конфигурации.",
+            reply_markup=get_webapp_keyboard()
+        )
+
+
 @router.message()
 async def handle_message(message: types.Message):
     """Handle any other message"""

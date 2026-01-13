@@ -40,12 +40,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
         // #endregion
         setUser(result.user)
       } else {
-        // Development mode - no Telegram
-        console.warn('Running without Telegram WebApp')
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'UserContext.tsx:33',message:'no initData - dev mode',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-        // #endregion
-        setError('Telegram WebApp не доступен')
+        // Development mode - use dev token
+        if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+          api.setToken('dev')
+          try {
+            const result = await api.validateAuth()
+            setUser(result.user)
+          } catch (err) {
+            console.warn('Dev auth failed, continuing without user:', err)
+            setError(null) // Don't set error in dev mode
+          }
+        } else {
+          // Production mode - no Telegram
+          console.warn('Running without Telegram WebApp')
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'UserContext.tsx:33',message:'no initData - production mode',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+          // #endregion
+          setError('Telegram WebApp не доступен')
+        }
       }
     } catch (err) {
       // #region agent log

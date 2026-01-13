@@ -25,6 +25,11 @@ export default function ChatInterface() {
     const initData = telegram.initData
     if (initData) {
       api.setToken(initData)
+    } else {
+      // Development mode: use "dev" token if no Telegram WebApp
+      if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+        api.setToken('dev')
+      }
     }
   }, [])
 
@@ -70,10 +75,15 @@ export default function ChatInterface() {
       if (initData) {
         api.setToken(initData)
       } else {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatInterface.tsx:61',message:'no initData available',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
-        throw new Error('Telegram authentication required')
+        // Development mode: use "dev" token if no Telegram WebApp
+        if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+          api.setToken('dev')
+        } else {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatInterface.tsx:61',message:'no initData available',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+          throw new Error('Telegram authentication required')
+        }
       }
       
       // #region agent log
@@ -176,6 +186,23 @@ export default function ChatInterface() {
                           className="w-full py-3 rounded-xl tg-button font-medium"
                         >
                           {action.label || 'Открыть на карте'}
+                        </button>
+                      )
+                    }
+                    if (action.type === 'open_admin') {
+                      return (
+                        <button
+                          key={`${action.type}-${index}`}
+                          onClick={() => {
+                            if (action.url) {
+                              window.location.href = action.url
+                            } else {
+                              navigate('/admin')
+                            }
+                          }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-medium hover:shadow-lg transition-all"
+                        >
+                          {action.label || 'Открыть админ панель'}
                         </button>
                       )
                     }

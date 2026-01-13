@@ -30,8 +30,24 @@ class AssistantService:
             context: Optional context (module_id, item_id)
             
         Returns:
-            Tuple of (response text, list of sources)
+            Tuple of (response text, list of sources, list of actions)
         """
+        # Check for special admin command
+        admin_keywords = ["admin", "админ", "админка", "панель администратора"]
+        message_lower = message.lower().strip()
+        
+        if any(keyword in message_lower for keyword in admin_keywords):
+            from app.config import settings
+            admin_url = f"{settings.TELEGRAM_WEBAPP_URL}/admin" if settings.TELEGRAM_WEBAPP_URL else "/admin"
+            
+            response_text = "🔐 Перейдите в админ панель для управления мероприятиями:"
+            actions = [{
+                "type": "open_admin",
+                "label": "Открыть админ панель",
+                "url": admin_url
+            }]
+            return response_text, [], actions
+        
         # Get event info
         event = await self.db.get(Event, event_id)
         if not event:

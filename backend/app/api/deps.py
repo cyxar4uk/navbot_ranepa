@@ -17,7 +17,23 @@ async def get_current_user(
     Get current user from Telegram init data.
     
     Authorization header format: Bearer <telegram_init_data>
+    In DEBUG mode, if no authorization provided, creates a dev user.
     """
+    # In DEBUG mode, allow dev user if no authorization
+    if settings.DEBUG and not authorization:
+        user_service = UserService(db)
+        # Get or create dev user
+        dev_user = await user_service.get_or_create(
+            telegram_id=999999999,  # Dev user ID
+            username="dev_user",
+            first_name="Dev",
+            last_name="User"
+        )
+        # Make dev user admin if not already
+        if dev_user.role != "admin":
+            dev_user = await user_service.update_role(dev_user.id, "admin")
+        return dev_user
+    
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -31,6 +47,20 @@ async def get_current_user(
         )
     
     init_data = authorization[7:]  # Remove "Bearer " prefix
+    
+    # In DEBUG mode, allow "dev" as a special token
+    if settings.DEBUG and init_data == "dev":
+        user_service = UserService(db)
+        dev_user = await user_service.get_or_create(
+            telegram_id=999999999,
+            username="dev_user",
+            first_name="Dev",
+            last_name="User"
+        )
+        # Make dev user admin if not already
+        if dev_user.role != "admin":
+            dev_user = await user_service.update_role(dev_user.id, "admin")
+        return dev_user
     
     # Validate telegram init data
     if settings.DEBUG:

@@ -169,6 +169,11 @@ export type AssistantAction =
       label?: string
       location_id: string
     }
+  | {
+      type: 'open_admin'
+      label?: string
+      url?: string
+    }
 
 // Module type definitions
 export interface ModuleTypeDefinition {
