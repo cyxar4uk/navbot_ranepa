@@ -114,14 +114,24 @@ function DraggableModule({
       {/* Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <button
-          onClick={() => setSelectedModule(module)}
+          onClick={() => {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:117',message:'setSelectedModule button clicked',data:{moduleId:module.id,moduleName:module.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            setSelectedModule(module);
+          }}
           className="p-2 hover:bg-muted rounded-lg transition-colors"
           title="Настройки"
         >
           <SettingsIcon className="w-5 h-5 text-muted-foreground" />
         </button>
         <button
-          onClick={() => toggleModule(module.id)}
+          onClick={() => {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:124',message:'toggleModule button clicked',data:{moduleId:module.id,currentEnabled:module.enabled},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            toggleModule(module.id);
+          }}
           className={`p-2 rounded-lg transition-colors ${
             module.enabled
               ? 'bg-primary/20 text-primary hover:bg-primary/30'
@@ -136,7 +146,12 @@ function DraggableModule({
           )}
         </button>
         <button
-          onClick={() => onDelete(module.id)}
+          onClick={() => {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:139',message:'onDelete button clicked',data:{moduleId:module.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            onDelete(module.id);
+          }}
           className="p-2 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
           title="Удалить"
         >
@@ -163,19 +178,34 @@ function EventBuilderContent() {
   });
 
   useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:165',message:'EventBuilderNew useEffect',data:{hasEventId:!!eventId,eventId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     if (!eventId) return;
     api.setTokenFromStorage();
     loadModules();
   }, [eventId]);
 
   const loadModules = async () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:171',message:'loadModules start',data:{eventId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     if (!eventId) return;
     try {
       setLoading(true);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:175',message:'loadModules api call',data:{eventId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       const apiModules = await api.adminGetEventModules(eventId);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:177',message:'loadModules api success',data:{modulesCount:apiModules?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       const uiModules = apiModulesToUIModules(apiModules);
       setModules(uiModules);
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:180',message:'loadModules error',data:{errorMessage:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       console.error('Failed to load modules:', err);
     } finally {
       setLoading(false);
@@ -183,23 +213,38 @@ function EventBuilderContent() {
   };
 
   const handleSave = async () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:185',message:'handleSave called',data:{hasEventId:!!eventId,modulesCount:modules.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!eventId) return;
     try {
       setSaving(true);
       
       // Update all modules via API
       for (const module of modules) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:192',message:'handleSave updating module',data:{moduleId:module.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+        // #endregion
         const apiModuleData = uiModuleToApiModule(module, eventId);
         await api.updateModule(module.id, apiModuleData);
       }
       
       // Also update order via reorder API
       const moduleIds = modules.map(m => m.id);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:198',message:'handleSave reorderModules',data:{moduleIdsCount:moduleIds.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       await api.reorderModules(eventId, moduleIds);
       
       // Navigate back to admin dashboard
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:201',message:'handleSave success',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       navigate('/admin');
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:203',message:'handleSave error',data:{errorMessage:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       console.error('Failed to save modules:', err);
       alert('Ошибка при сохранении модулей');
     } finally {
@@ -224,13 +269,22 @@ function EventBuilderContent() {
   }, []);
 
   const toggleModule = async (id: string) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:226',message:'toggleModule function called',data:{id,hasModule:!!modules.find(m=>m.id===id),hasEventId:!!eventId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+    // #endregion
     const module = modules.find(m => m.id === id);
     if (!module || !eventId) return;
     
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:231',message:'toggleModule api call start',data:{id,newEnabled:!module.enabled},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       const updated = await api.updateModule(id, {
         enabled: !module.enabled,
       });
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:235',message:'toggleModule api success',data:{id,hasUpdated:!!updated},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       const updatedUIModule = apiModulesToUIModules([updated])[0];
       setModules((prev) =>
         prev.map((m) => (m.id === id ? updatedUIModule : m))
@@ -239,14 +293,23 @@ function EventBuilderContent() {
         setSelectedModule(updatedUIModule);
       }
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:241',message:'toggleModule error',data:{id,errorMessage:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       console.error('Failed to toggle module:', err);
     }
   };
 
   const deleteModule = async (id: string) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:246',message:'deleteModule function called',data:{id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!confirm('Удалить модуль?')) return;
     
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EventBuilderNew.tsx:250',message:'deleteModule api call start',data:{id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       await api.deleteModule(id);
       setModules((prev) => prev.filter(m => m.id !== id));
       if (selectedModule?.id === id) {

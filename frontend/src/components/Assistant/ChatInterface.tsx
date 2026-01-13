@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEvent } from '../../context/EventContext'
+import { useUser } from '../../context/UserContext'
 import api from '../../services/api'
 import telegram from '../../services/telegram'
 import type { AssistantMessage, AssistantAction } from '../../types'
@@ -8,6 +9,7 @@ import { Send, Bot, User } from 'lucide-react'
 
 export default function ChatInterface() {
   const { event } = useEvent()
+  const { user } = useUser()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const itemId = searchParams.get('item')
@@ -17,6 +19,14 @@ export default function ChatInterface() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Ensure token is set from Telegram initData before making requests
+    const initData = telegram.initData
+    if (initData) {
+      api.setToken(initData)
+    }
+  }, [])
 
   useEffect(() => {
     // Add welcome message
@@ -37,6 +47,9 @@ export default function ChatInterface() {
   }
 
   const handleSend = async () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatInterface.tsx:39',message:'handleSend called',data:{hasInput:!!input.trim(),hasEvent:!!event,loading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+    // #endregion
     if (!input.trim() || !event || loading) return
 
     const userMessage: AssistantMessage = {
@@ -52,11 +65,28 @@ export default function ChatInterface() {
     telegram.hapticImpact('light')
 
     try {
+      // Ensure token is set before making request
+      const initData = telegram.initData
+      if (initData) {
+        api.setToken(initData)
+      } else {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatInterface.tsx:61',message:'no initData available',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        throw new Error('Telegram authentication required')
+      }
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatInterface.tsx:67',message:'api.chat call start',data:{eventId:event.id,messageLength:userMessage.content.length,hasToken:!!initData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       const response = await api.chat({
         event_id: event.id,
         message: userMessage.content,
         context: itemId ? { item_id: itemId } : undefined,
       })
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatInterface.tsx:60',message:'api.chat success',data:{hasResponse:!!response,responseLength:response?.response?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
 
       const assistantMessage: UIMessage = {
         id: (Date.now() + 1).toString(),
@@ -68,6 +98,9 @@ export default function ChatInterface() {
 
       setMessages(prev => [...prev, assistantMessage])
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/81cb5446-668f-43af-b09f-f0be6da0ac8c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatInterface.tsx:70',message:'api.chat error',data:{errorMessage:err instanceof Error?err.message:String(err),errorType:err?.constructor?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+      // #endregion
       console.error('Chat error:', err)
       const errorMessage: AssistantMessage = {
         id: (Date.now() + 1).toString(),
