@@ -7,7 +7,8 @@ from app.database import get_db
 from app.models import KnowledgeChunk
 from app.schemas import (
     EventCreate, EventUpdate, EventResponse, EventListResponse,
-    ModuleResponse, AssistantKnowledgeCreate, AssistantKnowledgeResponse,
+    ModuleCreate, ModuleUpdate, ModuleResponse, ModuleReorder,
+    AssistantKnowledgeCreate, AssistantKnowledgeResponse,
     KnowledgeChunkResponse, KnowledgeChunkRefreshRequest
 )
 from app.services import EventService, ModuleService, AssistantService, KnowledgeChunkService
@@ -91,6 +92,58 @@ async def admin_get_module_types(
     """Get available module types (admin)"""
     service = ModuleService(db)
     return await service.get_module_types()
+
+
+@router.post("/modules", response_model=ModuleResponse)
+async def admin_create_module(
+    data: ModuleCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new module (admin - uses JWT token, no Telegram required)"""
+    service = ModuleService(db)
+    module = await service.create(data)
+    return module
+
+
+@router.put("/modules/{module_id}", response_model=ModuleResponse)
+async def admin_update_module(
+    module_id: UUID,
+    data: ModuleUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a module (admin - uses JWT token, no Telegram required)"""
+    service = ModuleService(db)
+    module = await service.update(module_id, data)
+    if not module:
+        raise HTTPException(status_code=404, detail="Module not found")
+    return module
+
+
+@router.delete("/modules/{module_id}")
+async def admin_delete_module(
+    module_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a module (admin - uses JWT token, no Telegram required)"""
+    service = ModuleService(db)
+    success = await service.delete(module_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Module not found")
+    return {"success": True}
+
+
+@router.put("/modules/reorder/{event_id}")
+async def admin_reorder_modules(
+    event_id: UUID,
+    data: ModuleReorder,
+    db: AsyncSession = Depends(get_db),
+):
+    """Reorder modules for an event (admin - uses JWT token, no Telegram required)"""
+    service = ModuleService(db)
+    success = await service.reorder(event_id, data.module_ids)
+    if not success:
+        raise HTTPException(status_code=400, detail="Invalid module IDs")
+    return {"success": True}
 
 
 # ==================== Knowledge Management ====================

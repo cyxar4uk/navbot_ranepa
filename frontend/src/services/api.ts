@@ -236,25 +236,29 @@ class ApiClient {
   }
 
   async createModule(data: Partial<Module>): Promise<Module> {
-    return this.request('/modules', {
+    // Use admin endpoint which doesn't require Telegram auth
+    return this.request('/admin/modules', {
       method: 'POST',
       body: JSON.stringify(data),
     })
   }
 
   async updateModule(moduleId: string, data: Partial<Module>): Promise<Module> {
-    return this.request(`/modules/${moduleId}`, {
+    // Use admin endpoint which doesn't require Telegram auth
+    return this.request(`/admin/modules/${moduleId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     })
   }
 
   async deleteModule(moduleId: string): Promise<{ success: boolean }> {
-    return this.request(`/modules/${moduleId}`, { method: 'DELETE' })
+    // Use admin endpoint which doesn't require Telegram auth
+    return this.request(`/admin/modules/${moduleId}`, { method: 'DELETE' })
   }
 
   async reorderModules(eventId: string, moduleIds: string[]): Promise<{ success: boolean }> {
-    return this.request(`/modules/reorder/${eventId}`, {
+    // Use admin endpoint which doesn't require Telegram auth
+    return this.request(`/admin/modules/reorder/${eventId}`, {
       method: 'PUT',
       body: JSON.stringify({ module_ids: moduleIds }),
     })
