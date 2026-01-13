@@ -2,11 +2,13 @@ import { useEvent } from '../../context/EventContext'
 import { useUser } from '../../context/UserContext'
 import Loading from '../common/Loading'
 import ErrorMessage from '../common/ErrorMessage'
+import { ModuleTile } from '../shared/ModuleTile'
 import { motion } from 'motion/react'
-import { Calendar, MapPin, Settings, Bell, ChevronRight, Sparkles, Mic, Send, Users } from 'lucide-react'
+import { Calendar, MapPin, Settings, Bell, Sparkles, Mic, Send } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import type { Module } from '../../types'
+import { apiModulesToUIModules } from '../../utils/moduleAdapter'
 
 export default function Dashboard() {
   const { event, modules, loading, error, refreshEvent } = useEvent()
@@ -61,23 +63,9 @@ export default function Dashboard() {
     }
   }
 
-  const getModuleIcon = (icon: string | null) => {
-    // Map icon strings to Lucide icons
-    const iconMap: Record<string, any> = {
-      Calendar,
-      Users,
-      Map: MapPin,
-      MessageCircle: Sparkles,
-      Briefcase: Sparkles,
-      Info: Sparkles,
-    }
-    return iconMap[icon || ''] || Sparkles
-  }
-
   const enabledModules = modules
     .filter((m) => m.enabled)
     .sort((a, b) => a.order - b.order)
-    .slice(0, 4) // Show max 4 modules
 
   const quickQuestions = [
     "Где кофе-брейк?",
@@ -164,52 +152,39 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+      {/* Info Banner */}
+      {event.status === 'finished' && (
+        <div className="mx-4 mb-6 bg-muted/50 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <Bell className="w-4 h-4 text-accent" />
+          </div>
+          <p className="text-sm text-foreground">
+            Это событие уже завершилось
+          </p>
+        </div>
+      )}
+
       {/* Modules Grid */}
-      <div className="px-4 md:px-6 mb-6 -mt-6">
-        <div className="grid grid-cols-2 gap-3 md:gap-4">
-          {enabledModules.map((module, idx) => {
-            const Icon = getModuleIcon(module.icon)
-            const colors = [
-              'from-primary to-accent',
-              'from-accent to-primary',
-              'from-primary to-destructive',
-              'from-destructive to-primary'
-            ]
+      <div className="px-4 pb-20 md:pb-8">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+          {enabledModules.map((module) => {
+            // Convert API module to UI format for icon mapping
+            const uiModules = apiModulesToUIModules([module]);
+            const uiModule = uiModules[0] || module;
+            const iconName = uiModule.icon || module.icon || 'Info';
+            const badgeValue = module.badge_value && module.badge_type === 'count' 
+              ? parseInt(module.badge_value, 10) 
+              : undefined;
             
             return (
-              <motion.button
+              <ModuleTile
                 key={module.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + idx * 0.1 }}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
+                name={module.title}
+                icon={iconName}
                 onClick={() => handleModuleClick(module)}
-                className="group relative"
-              >
-                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border hover:border-primary/50 transition-all h-full">
-                  {/* Gradient Icon Background */}
-                  <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br ${colors[idx % colors.length]} mb-3 md:mb-4 flex items-center justify-center shadow-lg`}>
-                    <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" strokeWidth={2} />
-                  </div>
-                  
-                  {/* Text */}
-                  <div className="text-left">
-                    <h3 className="text-sm md:text-base font-semibold text-foreground mb-1 line-clamp-2">
-                      {module.title}
-                    </h3>
-                    {module.badge_value && (
-                      <p className="text-xs md:text-sm text-muted-foreground">
-                        {module.badge_value}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Arrow indicator */}
-                  <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground absolute top-3 md:top-4 right-3 md:right-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </motion.button>
-            )
+                badge={badgeValue}
+              />
+            );
           })}
         </div>
       </div>

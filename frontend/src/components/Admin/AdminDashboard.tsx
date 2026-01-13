@@ -130,12 +130,14 @@ export default function AdminDashboard() {
         ) : (
           <div className="space-y-3">
             {events.map(event => (
-              <button
+              <div
                 key={event.id}
-                onClick={() => navigate(`/admin/events/${event.id}`)}
-                className="w-full flex items-center justify-between p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow text-left"
+                className="w-full flex items-center justify-between p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="min-w-0">
+                <button
+                  onClick={() => navigate(`/admin/events/${event.id}`)}
+                  className="flex-1 text-left min-w-0"
+                >
                   <div className="flex items-center gap-2 mb-1">
                     {getStatusBadge(event.status)}
                   </div>
@@ -143,9 +145,21 @@ export default function AdminDashboard() {
                   <p className="text-sm tg-hint">
                     {formatDate(event.date_start)} – {formatDate(event.date_end)}
                   </p>
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/admin/events/${event.id}/builder`);
+                    }}
+                    className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                    title="Конструктор модулей"
+                  >
+                    Конструктор
+                  </button>
+                  <ChevronRight className="w-5 h-5 tg-hint flex-shrink-0" />
                 </div>
-                <ChevronRight className="w-5 h-5 tg-hint flex-shrink-0" />
-              </button>
+              </div>
             ))}
           </div>
         )}

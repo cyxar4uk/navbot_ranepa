@@ -177,3 +177,175 @@ export interface ModuleTypeDefinition {
   description: string
   default_config: Record<string, unknown>
 }
+
+// ============= Design System Module Types =============
+
+// Module field types
+export type ModuleFieldType = 
+  | 'text' 
+  | 'textarea' 
+  | 'number' 
+  | 'toggle' 
+  | 'select' 
+  | 'color' 
+  | 'image' 
+  | 'radio'
+  | 'multiselect'
+  | 'slider'
+  | 'daterange';
+
+export interface ModuleField {
+  id: string;
+  label: string;
+  type: ModuleFieldType;
+  defaultValue?: any;
+  options?: Array<{ label: string; value: string }>;
+  min?: number;
+  max?: number;
+  step?: number;
+  placeholder?: string;
+  description?: string;
+  required?: boolean;
+  isPremium?: boolean;
+  conditional?: {
+    field: string;
+    value: any;
+  };
+}
+
+// Module-specific configurations
+export interface ProgramModuleConfig {
+  showFilters: boolean;
+  showSearch: boolean;
+  defaultView: 'list' | 'grid' | 'timeline';
+  allowRegistration: boolean;
+  showSpeakerPhotos: boolean;
+  showCapacity: boolean;
+  groupByDay: boolean;
+  showTags: boolean;
+  enableFavorites: boolean;
+  timeFormat: '12h' | '24h';
+  enableNotifications: boolean;
+}
+
+export interface SpeakersModuleConfig {
+  displayStyle: 'grid' | 'list' | 'carousel';
+  showBio: boolean;
+  showCompany: boolean;
+  showSocials: boolean;
+  allowMessaging: boolean;
+  showSessions: boolean;
+  gridColumns: 2 | 3 | 4;
+  enableSearch: boolean;
+  enableFilters: boolean;
+  sortBy: 'name' | 'company' | 'sessions';
+}
+
+export interface MapModuleConfig {
+  showLegend: boolean;
+  allowZoom: boolean;
+  showLabels: boolean;
+  interactiveZones: boolean;
+  defaultZoom: number;
+  showCurrentLocation: boolean;
+  show3DView: boolean;
+  enableNavigation: boolean;
+  highlightActiveZones: boolean;
+}
+
+export interface NetworkingModuleConfig {
+  enableChat: boolean;
+  enableMatching: boolean;
+  showOnlineStatus: boolean;
+  allowGroupCreation: boolean;
+  showInterests: boolean;
+  enableScheduling: boolean;
+  matchingAlgorithm: 'interests' | 'industry' | 'random';
+  maxConnectionsPerDay: number;
+}
+
+export interface AssistantModuleConfig {
+  enableAI: boolean;
+  showQuickActions: boolean;
+  enableVoice: boolean;
+  language: 'ru' | 'en';
+  personalizedSuggestions: boolean;
+  contextAware: boolean;
+  showFAQ: boolean;
+}
+
+export interface InfoModuleConfig {
+  showVenue: boolean;
+  showSchedule: boolean;
+  showFAQ: boolean;
+  showContacts: boolean;
+  showWiFi: boolean;
+  showTransport: boolean;
+  showAccommodation: boolean;
+  showEmergency: boolean;
+  customSections: Array<{
+    title: string;
+    content: string;
+    icon?: string;
+  }>;
+}
+
+export interface PartnersModuleConfig {
+  displayStyle: 'grid' | 'carousel' | 'masonry';
+  showTiers: boolean;
+  showDescription: boolean;
+  allowClick: boolean;
+  gridColumns: 2 | 3 | 4;
+  showLogo: boolean;
+  showBooth: boolean;
+  enableSearch: boolean;
+}
+
+export type ModuleConfig = 
+  | ProgramModuleConfig
+  | SpeakersModuleConfig
+  | MapModuleConfig
+  | NetworkingModuleConfig
+  | AssistantModuleConfig
+  | InfoModuleConfig
+  | PartnersModuleConfig;
+
+// UI Module type (extends existing Module for Design System compatibility)
+export interface UIModule {
+  id: string;
+  type: 'program' | 'speakers' | 'map' | 'networking' | 'assistant' | 'info' | 'partners' | 'custom';
+  name: string;
+  icon: string;
+  description?: string;
+  enabled: boolean;
+  order: number;
+  config?: Partial<ModuleConfig>;
+  fields?: ModuleField[];
+  category: 'core' | 'engagement' | 'information' | 'custom';
+  isPremium?: boolean;
+}
+
+export interface ModuleTemplate {
+  id: string;
+  type: UIModule['type'];
+  name: string;
+  icon: string;
+  description: string;
+  category: UIModule['category'];
+  defaultConfig: Partial<ModuleConfig>;
+  fields: ModuleField[];
+  isPremium?: boolean;
+  previewImage?: string;
+}
+
+export interface EventConfig {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  modules: UIModule[];
+  theme: {
+    primaryColor: string;
+    accentColor: string;
+  };
+}
