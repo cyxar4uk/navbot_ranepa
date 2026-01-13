@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Event, EventItem, AssistantKnowledge, EventSpeaker, KnowledgeChunk
+from app.models import Event, EventItem, AssistantKnowledge, EventSpeaker, KnowledgeChunk, Module
 from app.services.knowledge_chunk_service import KnowledgeChunkService
 from app.utils.llm_client import llm_client
 
@@ -97,6 +97,38 @@ class AssistantService:
     ) -> list[str]:
         """Build knowledge base for the assistant"""
         knowledge_items: list[str] = []
+
+        # Add event modules content
+        modules_result = await self.db.execute(
+            select(Module).where(
+                Module.event_id == event.id,
+                Module.enabled == True
+            ).order_by(Module.order)
+        )
+        modules = list(modules_result.scalars().all())
+        
+        if modules:
+            module_info = []
+            for module in modules:
+                module_data = f"Модуль '{module.title}' (тип: {module.type}):"
+                if module.config:
+                    # Extract meaningful content from module config
+                    config_strs = []
+                    for key, value in module.config.items():
+                        if value and isinstance(value, (str, int, float, bool)):
+                            if isinstance(value, bool):
+                                if value:
+                                    config_strs.append(f"  - {key}: включено")
+                            else:
+                                config_strs.append(f"  - {key}: {value}")
+                    if config_strs:
+                        module_data += "\n" + "\n".join(config_strs)
+                module_info.append(module_data)
+            
+            if module_info:
+                knowledge_items.append(
+                    f"Модули мероприятия '{event.title}':\n" + "\n\n".join(module_info)
+                )
 
         result = await self.db.execute(
             select(KnowledgeChunk).where(KnowledgeChunk.event_id == event.id)

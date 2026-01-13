@@ -39,7 +39,6 @@ function App() {
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route element={<AdminGuard />}>
                 <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/events/:eventId" element={<EventBuilder />} />
                 <Route path="/admin/events/:eventId/builder" element={<EventBuilderNew />} />
               </Route>
             </Routes>
