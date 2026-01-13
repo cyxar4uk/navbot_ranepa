@@ -146,8 +146,7 @@ export const uiModulesToApiModules = (
  */
 export const createUIModuleFromTemplate = (
   template: ModuleTemplate,
-  order: number,
-  eventId: string
+  order: number
 ): UIModule => {
   return {
     id: `${template.type}-${Date.now()}`,

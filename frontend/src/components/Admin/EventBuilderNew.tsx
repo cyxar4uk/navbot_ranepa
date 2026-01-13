@@ -20,7 +20,6 @@ import {
   Info,
   Save,
   Smartphone,
-  Plus,
   Trash2,
   Zap,
   X,
@@ -262,7 +261,7 @@ function EventBuilderContent() {
     if (!eventId) return;
     
     try {
-      const newUIModule = createUIModuleFromTemplate(template, modules.length + 1, eventId);
+      const newUIModule = createUIModuleFromTemplate(template, modules.length + 1);
       const apiModuleData = uiModuleToApiModule(newUIModule, eventId);
       
       // Create module via API
