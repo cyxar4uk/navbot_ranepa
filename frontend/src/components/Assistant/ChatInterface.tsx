@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEvent } from '../../context/EventContext'
-import { useUser } from '../../context/UserContext'
 import api from '../../services/api'
 import telegram from '../../services/telegram'
 import type { AssistantMessage, AssistantAction } from '../../types'
@@ -9,7 +8,6 @@ import { Send, Bot, User } from 'lucide-react'
 
 export default function ChatInterface() {
   const { event } = useEvent()
-  const { user } = useUser()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const itemId = searchParams.get('item')
