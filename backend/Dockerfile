@@ -1,9 +1,9 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && \
+# Install system dependencies with timeout and retry
+RUN apt-get update -o Acquire::http::Timeout=10 -o Acquire::ftp::Timeout=10 && \
     apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
