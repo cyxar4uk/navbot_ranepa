@@ -87,28 +87,21 @@ echo "5️⃣ Пересборка образов с нуля..."
 echo ""
 
 info "Начинаем пересборку всех сервисов..."
-info "Это может занять несколько минут, особенно при первой сборке..."
+info "Используем кеш Docker для ускорения сборки (если нужно полная пересборка, используйте: docker-compose build --no-cache)"
 
-# Попытка сборки с таймаутом и retry
-MAX_RETRIES=3
-RETRY_COUNT=0
-
-while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+# Сборка с использованием кеша (быстрее)
+if docker-compose build 2>&1; then
+    success "Все образы успешно пересобраны"
+else
+    warning "Сборка с кешем не удалась, пробуем без кеша..."
     if docker-compose build --no-cache 2>&1; then
-        success "Все образы успешно пересобраны"
-        break
+        success "Все образы успешно пересобраны (без кеша)"
     else
-        RETRY_COUNT=$((RETRY_COUNT + 1))
-        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-            warning "Попытка $RETRY_COUNT из $MAX_RETRIES не удалась. Повторяем через 5 секунд..."
-            sleep 5
-        else
-            error "Ошибка при пересборке образов после $MAX_RETRIES попыток"
-            error "Проверьте логи выше и попробуйте запустить вручную: docker-compose build backend"
-            exit 1
-        fi
+        error "Ошибка при пересборке образов"
+        error "Проверьте логи выше и попробуйте запустить вручную: docker-compose build backend"
+        exit 1
     fi
-done
+fi
 
 echo ""
 echo "6️⃣ Запуск контейнеров в правильном порядке..."
