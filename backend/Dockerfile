@@ -1,13 +1,22 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies with timeout and retry
-RUN apt-get update -o Acquire::http::Timeout=10 -o Acquire::ftp::Timeout=10 && \
-    apt-get install -y --no-install-recommends \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Configure apt with longer timeouts and retries for slow networks
+RUN echo 'Acquire::http::Timeout "60";' > /etc/apt/apt.conf.d/99timeout && \
+    echo 'Acquire::ftp::Timeout "60";' >> /etc/apt/apt.conf.d/99timeout && \
+    echo 'Acquire::Retries "5";' >> /etc/apt/apt.conf.d/99timeout && \
+    echo 'Acquire::http::Pipeline-Depth "0";' >> /etc/apt/apt.conf.d/99timeout
+
+# Install system dependencies with retry logic
+RUN for i in 1 2 3; do \
+        apt-get update && \
+        apt-get install -y --no-install-recommends \
+        gcc \
+        libpq-dev && \
+        rm -rf /var/lib/apt/lists/* && \
+        break || sleep 10; \
+    done
 
 # Install Python dependencies
 COPY requirements.txt .
