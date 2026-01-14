@@ -87,12 +87,28 @@ echo "5️⃣ Пересборка образов с нуля..."
 echo ""
 
 info "Начинаем пересборку всех сервисов..."
-if docker-compose build --no-cache 2>&1; then
-    success "Все образы успешно пересобраны"
-else
-    error "Ошибка при пересборке образов"
-    exit 1
-fi
+info "Это может занять несколько минут, особенно при первой сборке..."
+
+# Попытка сборки с таймаутом и retry
+MAX_RETRIES=3
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if docker-compose build --no-cache 2>&1; then
+        success "Все образы успешно пересобраны"
+        break
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            warning "Попытка $RETRY_COUNT из $MAX_RETRIES не удалась. Повторяем через 5 секунд..."
+            sleep 5
+        else
+            error "Ошибка при пересборке образов после $MAX_RETRIES попыток"
+            error "Проверьте логи выше и попробуйте запустить вручную: docker-compose build backend"
+            exit 1
+        fi
+    fi
+done
 
 echo ""
 echo "6️⃣ Запуск контейнеров в правильном порядке..."
