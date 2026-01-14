@@ -4,68 +4,71 @@ import { ModuleTemplate, ModuleField } from '../types';
 const programFields: ModuleField[] = [
   {
     id: 'showFilters',
-    label: 'Показывать фильтры',
+    label: 'Фильтры по категориям',
     type: 'toggle',
     defaultValue: true,
-    description: 'Позволяет пользователям фильтровать события по категориям и тегам'
+    description: 'Участники смогут фильтровать события по категориям, тегам и другим параметрам. Это поможет быстро найти интересующие их сессии.'
   },
   {
     id: 'showSearch',
-    label: 'Показывать поиск',
+    label: 'Поиск по программе',
     type: 'toggle',
     defaultValue: true,
-    description: 'Включает строку поиска по названию и описанию событий'
+    description: 'Участники смогут искать события по названию, описанию или спикерам. Удобно для быстрого поиска нужных сессий.'
   },
   {
     id: 'defaultView',
-    label: 'Вид по умолчанию',
+    label: 'Как показывать программу',
     type: 'radio',
     defaultValue: 'list',
     options: [
-      { label: 'Список', value: 'list' },
-      { label: 'Сетка', value: 'grid' },
-      { label: 'Таймлайн', value: 'timeline' }
+      { label: 'Список событий', value: 'list' },
+      { label: 'Сетка с карточками', value: 'grid' },
+      { label: 'Временная шкала', value: 'timeline' }
     ],
-    description: 'Как отображаются события при открытии модуля'
+    description: 'Выберите, как программа будет отображаться при открытии. Список — компактно, сетка — наглядно, таймлайн — по времени.'
   },
   {
     id: 'allowRegistration',
-    label: 'Разрешить регистрацию',
+    label: 'Регистрация на события',
     type: 'toggle',
     defaultValue: true,
-    description: 'Пользователи могут регистрироваться на события прямо из приложения'
+    description: 'Участники смогут регистрироваться на события прямо в приложении. После регистрации они получат напоминание и смогут добавить событие в календарь.'
   },
   {
     id: 'showSpeakerPhotos',
-    label: 'Показывать фото спикеров',
+    label: 'Фотографии спикеров',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'В карточках событий будут отображаться фотографии спикеров. Это помогает визуально запомнить, кто выступает.'
   },
   {
     id: 'showCapacity',
-    label: 'Показывать заполненность',
+    label: 'Свободные места',
     type: 'toggle',
     defaultValue: true,
-    description: 'Отображает количество зарегистрированных / вместимость'
+    description: 'Участники увидят, сколько мест осталось на каждое событие (например, "45 из 100"). Это поможет понять, нужно ли регистрироваться заранее.'
   },
   {
     id: 'groupByDay',
-    label: 'Группировать по дням',
+    label: 'Группировка по дням',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'События будут автоматически сгруппированы по дням мероприятия. Удобно для многодневных конференций.'
   },
   {
     id: 'showTags',
-    label: 'Показывать теги',
+    label: 'Теги событий',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'У каждого события будут отображаться теги (например, "EdTech", "Workshop", "Keynote"). Помогает быстро понять тип события.'
   },
   {
     id: 'enableFavorites',
-    label: 'Включить избранное',
+    label: 'Избранные события',
     type: 'toggle',
     defaultValue: true,
-    description: 'Пользователи могут добавлять события в избранное'
+    description: 'Участники смогут добавлять интересные события в избранное. Это поможет составить личную программу и не пропустить важные сессии.'
   },
   {
     id: 'timeFormat',
@@ -73,16 +76,17 @@ const programFields: ModuleField[] = [
     type: 'radio',
     defaultValue: '24h',
     options: [
-      { label: '24-часовой', value: '24h' },
-      { label: '12-часовой (AM/PM)', value: '12h' }
-    ]
+      { label: '24-часовой (14:00)', value: '24h' },
+      { label: '12-часовой (2:00 PM)', value: '12h' }
+    ],
+    description: 'Выберите формат отображения времени. 24-часовой формат более привычен в России.'
   },
   {
     id: 'enableNotifications',
-    label: 'Уведомления о событиях',
+    label: 'Напоминания о событиях',
     type: 'toggle',
     defaultValue: false,
-    description: 'Отправлять push-уведомления перед началом событий'
+    description: 'Участники будут получать push-уведомления перед началом событий, на которые они зарегистрировались. Помогает не пропустить важные сессии.'
   }
 ];
 
@@ -90,14 +94,15 @@ const programFields: ModuleField[] = [
 const speakersFields: ModuleField[] = [
   {
     id: 'displayStyle',
-    label: 'Стиль отображения',
+    label: 'Как показывать спикеров',
     type: 'radio',
     defaultValue: 'grid',
     options: [
-      { label: 'Сетка', value: 'grid' },
+      { label: 'Сетка с фото', value: 'grid' },
       { label: 'Список', value: 'list' },
       { label: 'Карусель', value: 'carousel' }
-    ]
+    ],
+    description: 'Выберите способ отображения спикеров. Сетка — наглядно с фото, список — компактно, карусель — для просмотра по одному.'
   },
   {
     id: 'gridColumns',
@@ -107,6 +112,7 @@ const speakersFields: ModuleField[] = [
     min: 2,
     max: 4,
     step: 1,
+    description: 'Сколько спикеров показывать в одной строке при отображении сеткой. Больше колонок — компактнее, меньше — крупнее фото.',
     conditional: {
       field: 'displayStyle',
       value: 'grid'
@@ -114,60 +120,64 @@ const speakersFields: ModuleField[] = [
   },
   {
     id: 'showBio',
-    label: 'Показывать биографию',
+    label: 'Биография спикеров',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'В профилях спикеров будет отображаться их биография и опыт. Помогает участникам узнать больше о спикере перед выступлением.'
   },
   {
     id: 'showCompany',
-    label: 'Показывать компанию',
+    label: 'Компания спикера',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Будет показана компания или организация, которую представляет спикер. Помогает понять контекст выступления.'
   },
   {
     id: 'showSocials',
-    label: 'Показывать соцсети',
+    label: 'Социальные сети',
     type: 'toggle',
     defaultValue: false,
-    description: 'Отображает ссылки на социальные сети спикеров'
+    description: 'Участники увидят ссылки на социальные сети спикеров (LinkedIn, Twitter и т.д.). Позволяет связаться со спикером после мероприятия.'
   },
   {
     id: 'allowMessaging',
-    label: 'Разрешить сообщения',
+    label: 'Сообщения спикерам',
     type: 'toggle',
     defaultValue: false,
-    description: 'Участники могут отправлять сообщения спикерам'
+    description: 'Участники смогут отправлять личные сообщения спикерам прямо в приложении. Полезно для вопросов после выступления или обсуждения тем.'
   },
   {
     id: 'showSessions',
-    label: 'Показывать сессии',
+    label: 'Выступления спикера',
     type: 'toggle',
     defaultValue: true,
-    description: 'Список выступлений спикера на мероприятии'
+    description: 'В профиле спикера будет показан список всех его выступлений на мероприятии. Удобно для планирования программы.'
   },
   {
     id: 'enableSearch',
-    label: 'Включить поиск',
+    label: 'Поиск спикеров',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Участники смогут искать спикеров по имени, компании или темам выступлений. Помогает быстро найти нужного эксперта.'
   },
   {
     id: 'enableFilters',
-    label: 'Включить фильтры',
+    label: 'Фильтры спикеров',
     type: 'toggle',
     defaultValue: false,
-    description: 'Фильтрация по компании, индустрии, темам'
+    description: 'Участники смогут фильтровать спикеров по компании, индустрии или темам. Полезно для поиска экспертов в конкретной области.'
   },
   {
     id: 'sortBy',
-    label: 'Сортировать по',
+    label: 'Сортировка спикеров',
     type: 'select',
     defaultValue: 'name',
     options: [
-      { label: 'Имени', value: 'name' },
-      { label: 'Компании', value: 'company' },
-      { label: 'Количеству сессий', value: 'sessions' }
-    ]
+      { label: 'По имени (А-Я)', value: 'name' },
+      { label: 'По компании', value: 'company' },
+      { label: 'По количеству выступлений', value: 'sessions' }
+    ],
+    description: 'Как будут отсортированы спикеры по умолчанию. По имени — алфавитно, по компании — группировка, по выступлениям — самые активные.'
   }
 ];
 
@@ -175,69 +185,70 @@ const speakersFields: ModuleField[] = [
 const mapFields: ModuleField[] = [
   {
     id: 'showLegend',
-    label: 'Показывать легенду',
+    label: 'Легенда карты',
     type: 'toggle',
     defaultValue: true,
-    description: 'Легенда с описанием зон на карте'
+    description: 'Участники увидят легенду с объяснением, что означают разные зоны и иконки на карте. Помогает быстро понять структуру площадки.'
   },
   {
     id: 'allowZoom',
-    label: 'Разрешить зум',
+    label: 'Увеличение карты',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Участники смогут увеличивать и уменьшать карту для детального просмотра. Удобно для поиска конкретных аудиторий.'
   },
   {
     id: 'defaultZoom',
-    label: 'Зум по умолчанию',
+    label: 'Начальный масштаб',
     type: 'slider',
     defaultValue: 100,
     min: 50,
     max: 200,
     step: 10,
-    description: 'Начальный масштаб карты (в процентах)'
+    description: 'Начальный масштаб карты при открытии. Меньше — видно всю площадку, больше — детали конкретной зоны.'
   },
   {
     id: 'showLabels',
-    label: 'Показывать подписи',
+    label: 'Названия зон',
     type: 'toggle',
     defaultValue: true,
-    description: 'Названия зон на карте'
+    description: 'На карте будут отображаться названия зон, аудиторий и залов. Без этого участникам будет сложнее ориентироваться.'
   },
   {
     id: 'interactiveZones',
-    label: 'Интерактивные зоны',
+    label: 'Кликабельные зоны',
     type: 'toggle',
     defaultValue: true,
-    description: 'Клик по зоне показывает детали и события'
+    description: 'При клике на зону участники увидят детальную информацию: какие события там проходят, как добраться, контакты. Очень удобно для навигации.'
   },
   {
     id: 'showCurrentLocation',
-    label: 'Показывать геопозицию',
+    label: 'Моё местоположение',
     type: 'toggle',
     defaultValue: false,
-    description: 'Отображение текущего местоположения пользователя'
+    description: 'На карте будет отображаться текущее местоположение участника (если разрешён доступ к геолокации). Помогает понять, где вы находитесь и как добраться до нужной зоны.'
   },
   {
     id: 'show3DView',
-    label: '3D вид',
+    label: '3D карта',
     type: 'toggle',
     defaultValue: false,
-    description: 'Трехмерное отображение площадки',
+    description: 'Карта будет отображаться в трёхмерном виде. Более наглядно показывает структуру площадки, но требует больше ресурсов.',
     isPremium: true
   },
   {
     id: 'enableNavigation',
-    label: 'Включить навигацию',
+    label: 'Построение маршрута',
     type: 'toggle',
     defaultValue: false,
-    description: 'Построение маршрута до зоны'
+    description: 'Участники смогут построить маршрут от своего местоположения до нужной зоны. Карта покажет путь с указаниями, как добраться.'
   },
   {
     id: 'highlightActiveZones',
-    label: 'Подсвечивать активные зоны',
+    label: 'Подсветка активных зон',
     type: 'toggle',
     defaultValue: true,
-    description: 'Зоны с текущими событиями подсвечиваются'
+    description: 'Зоны, где сейчас проходят события, будут подсвечиваться на карте. Помогает быстро найти, где сейчас что-то происходит.'
   }
 ];
 
@@ -245,28 +256,29 @@ const mapFields: ModuleField[] = [
 const networkingFields: ModuleField[] = [
   {
     id: 'enableChat',
-    label: 'Включить чат',
+    label: 'Личные сообщения',
     type: 'toggle',
     defaultValue: true,
-    description: 'Личные сообщения между участниками'
+    description: 'Участники смогут отправлять друг другу личные сообщения в чате. Это позволит обмениваться контактами, договариваться о встречах и общаться после мероприятия.'
   },
   {
     id: 'enableMatching',
-    label: 'Включить подбор',
+    label: 'Умный подбор контактов',
     type: 'toggle',
     defaultValue: true,
-    description: 'AI-подбор релевантных участников для нетворкинга'
+    description: 'AI будет автоматически предлагать участникам релевантные контакты на основе их интересов, индустрии и целей на мероприятии. Участники увидят список людей, с которыми им будет интересно познакомиться.'
   },
   {
     id: 'matchingAlgorithm',
-    label: 'Алгоритм подбора',
+    label: 'Как подбирать контакты',
     type: 'radio',
     defaultValue: 'interests',
     options: [
-      { label: 'По интересам', value: 'interests' },
-      { label: 'По индустрии', value: 'industry' },
-      { label: 'Случайный', value: 'random' }
+      { label: 'По общим интересам и темам', value: 'interests' },
+      { label: 'По индустрии и сфере деятельности', value: 'industry' },
+      { label: 'Случайный подбор', value: 'random' }
     ],
+    description: 'Выберите, как AI будет подбирать контакты для участников. По интересам — для людей с похожими темами, по индустрии — для коллег из одной сферы.',
     conditional: {
       field: 'enableMatching',
       value: true
@@ -274,39 +286,40 @@ const networkingFields: ModuleField[] = [
   },
   {
     id: 'showOnlineStatus',
-    label: 'Показывать онлайн статус',
+    label: 'Показывать кто онлайн',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Участники увидят, кто из других участников сейчас активен в приложении. Это поможет понять, с кем можно связаться прямо сейчас.'
   },
   {
     id: 'allowGroupCreation',
-    label: 'Разрешить создание групп',
+    label: 'Групповые чаты',
     type: 'toggle',
     defaultValue: false,
-    description: 'Участники могут создавать групповые чаты'
+    description: 'Участники смогут создавать групповые чаты для общения в командах, обсуждения тем или организации встреч. Полезно для нетворкинга в группах.'
   },
   {
     id: 'showInterests',
-    label: 'Показывать интересы',
+    label: 'Показывать интересы в профилях',
     type: 'toggle',
     defaultValue: true,
-    description: 'Отображение интересов и тем в профилях'
+    description: 'В профилях участников будут отображаться их интересы и темы, которыми они занимаются. Это поможет быстрее найти единомышленников и начать разговор.'
   },
   {
     id: 'enableScheduling',
-    label: 'Планирование встреч',
+    label: 'Назначение встреч',
     type: 'toggle',
     defaultValue: false,
-    description: 'Возможность назначать встречи с участниками'
+    description: 'Участники смогут назначать встречи друг с другом прямо в приложении. Можно выбрать время, место и тему встречи. Полезно для планирования нетворкинга.'
   },
   {
     id: 'maxConnectionsPerDay',
-    label: 'Макс. новых контактов в день',
+    label: 'Лимит новых контактов в день',
     type: 'number',
     defaultValue: 50,
     min: 10,
     max: 200,
-    description: 'Ограничение для предотвращения спама'
+    description: 'Максимальное количество новых контактов, которые участник может добавить за день. Ограничение помогает предотвратить спам и мотивирует качественный нетворкинг.'
   }
 ];
 
@@ -314,56 +327,57 @@ const networkingFields: ModuleField[] = [
 const assistantFields: ModuleField[] = [
   {
     id: 'enableAI',
-    label: 'Включить AI',
+    label: 'Умный AI-ассистент',
     type: 'toggle',
     defaultValue: true,
-    description: 'Интеллектуальный ассистент на базе AI',
+    description: 'Участники смогут задавать вопросы AI-ассистенту о программе, спикерах, навигации и мероприятии. Ассистент понимает естественный язык и даёт развёрнутые ответы.',
     isPremium: true
   },
   {
     id: 'showQuickActions',
-    label: 'Быстрые действия',
+    label: 'Быстрые кнопки',
     type: 'toggle',
     defaultValue: true,
-    description: 'Часто используемые команды одной кнопкой'
+    description: 'В интерфейсе ассистента будут показаны кнопки с частыми вопросами (например, "Где находится главная сцена?", "Какие события сейчас?"). Ускоряет получение информации.'
   },
   {
     id: 'enableVoice',
-    label: 'Голосовой ввод',
+    label: 'Голосовые вопросы',
     type: 'toggle',
     defaultValue: false,
-    description: 'Возможность задавать вопросы голосом'
+    description: 'Участники смогут задавать вопросы голосом вместо ввода текста. Удобно, когда руки заняты или нужно быстро получить ответ.'
   },
   {
     id: 'language',
-    label: 'Язык',
+    label: 'Язык ассистента',
     type: 'radio',
     defaultValue: 'ru',
     options: [
       { label: 'Русский', value: 'ru' },
       { label: 'English', value: 'en' }
-    ]
+    ],
+    description: 'На каком языке ассистент будет отвечать на вопросы. Полезно для международных мероприятий.'
   },
   {
     id: 'personalizedSuggestions',
-    label: 'Персонализированные рекомендации',
+    label: 'Персональные рекомендации',
     type: 'toggle',
     defaultValue: true,
-    description: 'Ассистент предлагает события на основе ваших интересов'
+    description: 'Ассистент будет предлагать события и спикеров на основе интересов участника и его регистраций. Помогает найти самое интересное для каждого.'
   },
   {
     id: 'contextAware',
-    label: 'Контекстная осведомленность',
+    label: 'Учёт местоположения и времени',
     type: 'toggle',
     defaultValue: true,
-    description: 'Ассистент учитывает текущее местоположение и время'
+    description: 'Ассистент учитывает, где находится участник и какое сейчас время. Например, может предложить ближайшие события или напомнить о скором начале сессии.'
   },
   {
     id: 'showFAQ',
-    label: 'Показывать FAQ',
+    label: 'Частые вопросы (FAQ)',
     type: 'toggle',
     defaultValue: true,
-    description: 'Часто задаваемые вопросы в интерфейсе'
+    description: 'В интерфейсе ассистента будет показан список часто задаваемых вопросов. Участники смогут быстро найти ответы на популярные вопросы без ввода текста.'
   }
 ];
 
@@ -371,55 +385,59 @@ const assistantFields: ModuleField[] = [
 const infoFields: ModuleField[] = [
   {
     id: 'showVenue',
-    label: 'Показывать место проведения',
+    label: 'Информация о площадке',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Участники увидят адрес, описание площадки, схему проезда и другую информацию о месте проведения мероприятия.'
   },
   {
     id: 'showSchedule',
-    label: 'Показывать расписание',
+    label: 'Общее расписание',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Будет показано общее расписание мероприятия: время начала и окончания, перерывы, ключевые события. Отличается от детальной программы.'
   },
   {
     id: 'showFAQ',
-    label: 'Показывать FAQ',
+    label: 'Часто задаваемые вопросы',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Раздел с ответами на популярные вопросы участников. Помогает быстро найти информацию без обращения к организаторам.'
   },
   {
     id: 'showContacts',
-    label: 'Показывать контакты',
+    label: 'Контакты организаторов',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Участники увидят контакты организаторов, горячей линии и службы поддержки. Полезно при возникновении вопросов или проблем.'
   },
   {
     id: 'showWiFi',
-    label: 'Показывать WiFi',
+    label: 'WiFi на площадке',
     type: 'toggle',
     defaultValue: true,
-    description: 'Информация о WiFi сети на площадке'
+    description: 'Будет показана информация о WiFi сети: название сети, пароль, инструкция по подключению. Очень важно для участников.'
   },
   {
     id: 'showTransport',
-    label: 'Показывать транспорт',
+    label: 'Как добраться',
     type: 'toggle',
     defaultValue: true,
-    description: 'Как добраться до площадки'
+    description: 'Участники увидят информацию о том, как добраться до площадки: общественный транспорт, парковка, такси. Помогает спланировать поездку.'
   },
   {
     id: 'showAccommodation',
-    label: 'Показывать размещение',
+    label: 'Гостиницы рядом',
     type: 'toggle',
     defaultValue: false,
-    description: 'Информация о гостиницах рядом'
+    description: 'Будет показана информация о гостиницах рядом с площадкой. Полезно для иногородних участников, которым нужно где-то остановиться.'
   },
   {
     id: 'showEmergency',
     label: 'Экстренные контакты',
     type: 'toggle',
     defaultValue: true,
-    description: 'Номера службы безопасности, медпункта и т.д.'
+    description: 'Участники увидят номера службы безопасности, медпункта, экстренных служб. Важно для безопасности на мероприятии.'
   }
 ];
 
@@ -427,14 +445,15 @@ const infoFields: ModuleField[] = [
 const partnersFields: ModuleField[] = [
   {
     id: 'displayStyle',
-    label: 'Стиль отображения',
+    label: 'Как показывать партнёров',
     type: 'radio',
     defaultValue: 'grid',
     options: [
-      { label: 'Сетка', value: 'grid' },
+      { label: 'Сетка с логотипами', value: 'grid' },
       { label: 'Карусель', value: 'carousel' },
-      { label: 'Masonry', value: 'masonry' }
-    ]
+      { label: 'Кирпичная кладка', value: 'masonry' }
+    ],
+    description: 'Выберите способ отображения партнёров. Сетка — равномерно, карусель — для просмотра по одному, кладка — для разных размеров логотипов.'
   },
   {
     id: 'gridColumns',
@@ -444,6 +463,7 @@ const partnersFields: ModuleField[] = [
     min: 2,
     max: 4,
     step: 1,
+    description: 'Сколько партнёров показывать в одной строке при отображении сеткой. Больше колонок — компактнее, меньше — крупнее логотипы.',
     conditional: {
       field: 'displayStyle',
       value: 'grid'
@@ -451,42 +471,45 @@ const partnersFields: ModuleField[] = [
   },
   {
     id: 'showTiers',
-    label: 'Показывать уровни',
+    label: 'Уровни партнёрства',
     type: 'toggle',
     defaultValue: true,
-    description: 'Генеральный партнер, золотой, серебряный и т.д.'
+    description: 'Будет показано, какой уровень партнёрства у каждой компании (Генеральный партнёр, Золотой, Серебряный и т.д.). Помогает понять важность партнёра.'
   },
   {
     id: 'showDescription',
-    label: 'Показывать описание',
+    label: 'Описание партнёров',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Участники увидят краткое описание каждого партнёра: чем занимается компания, что предлагает. Помогает понять, с кем можно сотрудничать.'
   },
   {
     id: 'allowClick',
-    label: 'Разрешить переход',
+    label: 'Переход на сайт партнёра',
     type: 'toggle',
     defaultValue: true,
-    description: 'Клик открывает детали партнера или сайт'
+    description: 'При клике на карточку партнёра участники смогут перейти на его сайт или увидеть детальную информацию. Полезно для установления контактов.'
   },
   {
     id: 'showLogo',
-    label: 'Показывать логотип',
+    label: 'Логотипы партнёров',
     type: 'toggle',
-    defaultValue: true
+    defaultValue: true,
+    description: 'Будут отображаться логотипы партнёров. Визуально узнаваемо и профессионально.'
   },
   {
     id: 'showBooth',
-    label: 'Показывать стенд',
+    label: 'Номера стендов',
     type: 'toggle',
     defaultValue: false,
-    description: 'Номер стенда на выставочной зоне'
+    description: 'Будет показан номер стенда партнёра на выставочной зоне. Помогает участникам найти партнёра на площадке для личного общения.'
   },
   {
     id: 'enableSearch',
-    label: 'Включить поиск',
+    label: 'Поиск партнёров',
     type: 'toggle',
-    defaultValue: false
+    defaultValue: false,
+    description: 'Участники смогут искать партнёров по названию компании или сфере деятельности. Удобно для быстрого поиска нужных контактов.'
   }
 ];
 
