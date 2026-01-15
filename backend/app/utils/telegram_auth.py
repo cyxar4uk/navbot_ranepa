@@ -3,7 +3,7 @@ import hmac
 import json
 from urllib.parse import parse_qsl, unquote
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.config import settings
 
@@ -53,7 +53,8 @@ def validate_telegram_init_data(init_data: str) -> Optional[dict]:
         
         # Check auth_date (not older than 24 hours)
         auth_date = int(parsed_data.get("auth_date", 0))
-        if datetime.utcnow() - datetime.utcfromtimestamp(auth_date) > timedelta(hours=24):
+        auth_datetime = datetime.fromtimestamp(auth_date, tz=timezone.utc)
+        if datetime.now(timezone.utc) - auth_datetime > timedelta(hours=24):
             return None
         
         # Parse user data

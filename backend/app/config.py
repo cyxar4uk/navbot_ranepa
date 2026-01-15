@@ -28,15 +28,18 @@ class Settings(BaseSettings):
     REDIS_URL: Optional[str] = None
 
     # Admin panel (browser) login
-    ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD: str = "admin"
+    # В production обязательно установить через переменные окружения!
+    ADMIN_USERNAME: str = "admin"  # ВАЖНО: Измените в production!
+    ADMIN_PASSWORD: str = "admin"  # ВАЖНО: Измените в production!
     ADMIN_TOKEN_EXPIRE_MINUTES: int = 120
     
     # Security
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    # В production обязательно установить через переменные окружения!
+    SECRET_KEY: str = "your-secret-key-change-in-production"  # ВАЖНО: Измените в production!
     
     # CORS
-    CORS_ORIGINS: list[str] = ["*"]
+    # В production укажите конкретные домены вместо "*"
+    CORS_ORIGINS: list[str] = ["*"]  # ВАЖНО: Ограничьте в production!
     
     class Config:
         env_file = ".env"

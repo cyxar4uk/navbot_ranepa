@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends, Header, Body
@@ -9,10 +9,11 @@ from app.config import settings
 router = APIRouter()
 
 ALGORITHM = "HS256"
+BEARER_PREFIX = "Bearer "
 
 
 def create_admin_token(username: str) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=settings.ADMIN_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ADMIN_TOKEN_EXPIRE_MINUTES)
     to_encode = {"sub": username, "type": "admin", "exp": expire}
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
@@ -31,9 +32,9 @@ def verify_admin_token(token: str) -> str:
 
 
 async def get_current_admin_token(authorization: Optional[str] = Header(None)) -> str:
-    if not authorization or not authorization.startswith("Bearer "):
+    if not authorization or not authorization.startswith(BEARER_PREFIX):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization header missing")
-    token = authorization[7:]
+    token = authorization[len(BEARER_PREFIX):]
     return verify_admin_token(token)
 
 
