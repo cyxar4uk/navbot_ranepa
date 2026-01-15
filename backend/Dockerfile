@@ -2,21 +2,22 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Configure apt with longer timeouts and retries for slow networks
-RUN echo 'Acquire::http::Timeout "60";' > /etc/apt/apt.conf.d/99timeout && \
-    echo 'Acquire::ftp::Timeout "60";' >> /etc/apt/apt.conf.d/99timeout && \
-    echo 'Acquire::Retries "5";' >> /etc/apt/apt.conf.d/99timeout && \
-    echo 'Acquire::http::Pipeline-Depth "0";' >> /etc/apt/apt.conf.d/99timeout
+# NOTE: Debian - это операционная система Linux внутри Docker образа
+# Она нужна только если Python пакеты требуют компиляции (gcc) или системных библиотек (libpq-dev)
+# 
+# В нашем случае:
+# - psycopg2-binary - предкомпилированный, НЕ требует libpq-dev
+# - python-jose[cryptography] - может требовать gcc для компиляции
+# 
+# Попробуем установить только gcc (без libpq-dev), так как используем psycopg2-binary
+# Если сборка упадёт - значит нужны оба пакета
 
-# Install system dependencies with retry logic
-RUN for i in 1 2 3; do \
-        apt-get update && \
-        apt-get install -y --no-install-recommends \
-        gcc \
-        libpq-dev && \
-        rm -rf /var/lib/apt/lists/* && \
-        break || sleep 10; \
-    done
+# Install only gcc (for compiling Python packages like cryptography)
+# libpq-dev НЕ нужен, так как используем psycopg2-binary (предкомпилированный)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
